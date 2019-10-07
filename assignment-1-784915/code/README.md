@@ -6,8 +6,10 @@ User must have Docker installed on his machine. Then, simply run the following c
 $ docker-compose up -d
 ```
 
-## Init mysimdbp-coredms
+## Initialisation of database
 To init mysimdbp-coredms, run the following command:
 ```sh
 $ python init.py
 ```
+
+## Data ingestion

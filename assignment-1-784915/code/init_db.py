@@ -3,13 +3,21 @@ from cassandra.auth import PlainTextAuthProvider
 import argparse
 
 
-def main(args):
-    # Connect to database
+def connect_db(args):
+    """
+    Connect to the database.
+    """
     auth_provider = PlainTextAuthProvider(username=args.username, password=args.password)
     cluster = Cluster(contact_points=[args.address], port=args.port, auth_provider=auth_provider)
     session = cluster.connect()
+    return cluster, session
 
-    # Create keyspace
+
+def init_keyspace(session):
+    """
+    Init keyspace and create table.
+    """
+    # Create keyspace mysimpbdp_coredms
     session.execute("""
     CREATE  KEYSPACE IF NOT EXISTS mysimpbdp_coredms
     WITH REPLICATION = {
@@ -18,7 +26,7 @@ def main(args):
     };
     """)
 
-    # Create the table
+    # Create Table apps
     session.execute("""
     CREATE TABLE IF NOT EXISTS mysimpbdp_coredms.apps (
         id uuid PRIMARY KEY, 
@@ -28,18 +36,15 @@ def main(args):
         reviews int,
         size text,
         installs text,
-        type text,
-        price float,
+        free Boolean,
+        price_dollar float,
         content_rating text,
         genres text,
-        last_updated text,
+        last_updated date,
         current_version text,
         android_version text
     );
     """)
-
-    # Close cluster
-    cluster.shutdown()
 
 
 def parse_arguments():
@@ -47,7 +52,6 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser("Init the Cassandra database.")
-
     parser.add_argument("--address", type=str, default='0.0.0.0',
                         help="List of contact points to try connecting for cluster discovery.")
     parser.add_argument("--port", type=int, default=9042,
@@ -56,11 +60,19 @@ def parse_arguments():
                         help="The username required to connect to Cassandra database.")
     parser.add_argument("--password", type=str, default='cassandra',
                         help="The password required to connect to Cassandra database.")
-
     args, _ = parser.parse_known_args()
     return args
 
 
 if __name__ == "__main__":
+    # Parse arguments
     args = parse_arguments()
-    main(args)
+
+    # Connect to database
+    cluster, session = connect_db(args)
+
+    # Init keyspace
+    init_keyspace(session)
+
+    # Close cluster
+    cluster.shutdown()
