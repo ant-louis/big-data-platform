@@ -17,7 +17,7 @@ services:
 #   container_name: cas2
 #   image: cassandra:latest
 #   volumes:
-#       - /Development/PetProjects/CassandraTut/data/node2:/var/lib/cassandra/data
+#       - ../data/cassandra/node2
 #   ports:
 #       - 9043:9042
 #   command: bash -c 'sleep 60;  /docker-entrypoint.sh cassandra -f'
