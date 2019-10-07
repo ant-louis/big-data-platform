@@ -5,6 +5,7 @@ User must have Docker installed on his machine. Then, simply run the following c
 ```sh
 $ docker-compose up -d
 ```
+Installer driver cassandra (check tuto)
 
 ## Initialisation of database
 To init mysimdbp-coredms, run the following command:

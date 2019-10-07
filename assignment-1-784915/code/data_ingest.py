@@ -1,8 +1,9 @@
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 import argparse
-from datetime import datetime
-import csv
+import pandas as pd
+import uuid
+
 
 def connect_db(args):
     """
@@ -14,37 +15,21 @@ def connect_db(args):
     return cluster, session
 
 
-def insert(session, data_path, nb_rows):
+def insert(df, session):
     """
     Insert the first 'nb_rows' rows of csv dataset to the database.
     """
-    with open(data_path) as csv_file:
-        # Read csv and skip the header
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        next(csv_reader, None)
-
-        # Insert rows to db
-        line_count = 0
-        for row in csv_reader:
-            session.execute("""
-            INSERT INTO apps(username,name,city,age) VALUES ('aali24','Ali Amin','Karachi',34);
-            """)
-            
-        
-
-
-
-def main(args):
-    # Connect to database
-    cluster, session = connect_db(args)
-
-    # Insert data from csv to database
-    insert(session, args.data, 10)
-
-
-
-    # Close cluster
-    cluster.shutdown()
+    for index, row in df.iterrows():
+        # if index >= 1000:
+        #     break
+        # else:
+        session.execute("""
+        INSERT INTO mysimpbdp_coredms.apps (id, name, category, rating, reviews, size, installs, free, price_dollar, 
+                                            content_rating, genres, last_updated, current_version, android_version)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);""",
+        (uuid.uuid1(), row['App'], row['Category'], row['Rating'], row['Reviews'], row['Size'], row['Installs'], row['Free'],
+        row['Price_dollars'], row['Content Rating'], row['Genres'], row['Last Updated'], row['Current Ver'], row['Android Ver'])
+        )
 
 
 def parse_arguments():
@@ -61,13 +46,27 @@ def parse_arguments():
                         help="Username required to connect to Cassandra database.")
     parser.add_argument("--password", type=str, default='cassandra',
                         help="Password required to connect to Cassandra database.")
-    parser.add_argument("--data", type=str, default='../data/googleplaystore.csv',
-                        help="Path to the dataset. Default is ../data/googleplaystore.csv")
+    parser.add_argument("--data", type=str, default='../data/googleplaystore_clean.csv',
+                        help="Path to the dataset. Default is ../data/googleplaystore_clean.csv")
 
     args, _ = parser.parse_known_args()
     return args
 
 
 if __name__ == "__main__":
+    # Parse arguments
     args = parse_arguments()
-    main(args)
+
+    # Connect to database
+    cluster, session = connect_db(args)
+
+    # Insert data from csv to database
+    df = pd.read_csv(args.data, sep=',', index_col=0, dtype={'Rating': 'float64',
+                                                            'Reviews': 'int64',
+                                                            'Free': 'bool',
+                                                            'Price_dollars':'float64',
+                                                            'Last Updated':'str'})
+    insert(df, session)
+
+    # Close cluster
+    cluster.shutdown()
