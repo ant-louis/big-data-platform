@@ -11,14 +11,32 @@ def main(args):
 
     # Create keyspace
     session.execute("""
-        CREATE  KEYSPACE IF NOT EXISTS mysimbdp
-        WITH REPLICATION = {
+    CREATE  KEYSPACE IF NOT EXISTS mysimpbdp_coredms
+    WITH REPLICATION = {
         'class' : 'SimpleStrategy', 
         'replication_factor' : 1 
-        };
+    };
     """)
 
-    # Requests
+    # Create the table
+    session.execute("""
+    CREATE TABLE IF NOT EXISTS mysimpbdp_coredms.apps (
+        id uuid PRIMARY KEY, 
+        name text,
+        category text,
+        rating float,
+        reviews int,
+        size text,
+        installs text,
+        type text,
+        price float,
+        content_rating text,
+        genres text,
+        last_updated text,
+        current_version text,
+        android_version text
+    );
+    """)
 
     # Close cluster
     cluster.shutdown()

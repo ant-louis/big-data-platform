@@ -1,2 +1,13 @@
-# This directory is about the code.
->Note: we must be able to compile and/or run the code. No BINARY files are within the code. External libraries should be automatically downloaded (e.g., via Maven, npm, pip, docker pull)
+# Guidelines
+
+## Docker Compose
+User must have Docker installed on his machine. Then, simply run the following command to compose the container(s):
+```sh
+$ docker-compose up -d
+```
+
+## Init mysimdbp-coredms
+To init mysimdbp-coredms, run the following command:
+```sh
+$ python init.py
+```
