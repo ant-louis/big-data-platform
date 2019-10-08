@@ -30,7 +30,7 @@ def insert(df, session):
         )
 
 
-def run(args):
+def run(args, i, return_dict):
     # Connect to database
     cluster, session = connect_db(args)
 
@@ -49,6 +49,9 @@ def run(args):
 
     # Close cluster
     cluster.shutdown()
+
+    # Store result of process i in shared variable return_dict
+    return_dict[i] = elapsed_time
 
     return elapsed_time
 
@@ -70,11 +73,10 @@ def parse_arguments():
     parser.add_argument("--data", type=str, default='../data/googleplaystore_clean.csv',
                         help="Path to the dataset. Default is ../data/googleplaystore_clean.csv")
 
-    args, _ = parser.parse_known_args()
+    args = parser.parse_args()
     return args
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    t = run(args)
-    print(t)
+    print(run(args, 0, [0]))

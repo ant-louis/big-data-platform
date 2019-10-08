@@ -8,9 +8,13 @@ This repository contains docker-compose file which uses the Cassandra container 
 - [Cassandra image](https://hub.docker.com/_/cassandra)
 
 This project uses Python 3.6 and the following packages are needed for the project to run properly:
+- [Cassandra Driver](https://docs.datastax.com/en/developer/python-driver/3.19/installation/)
 - [Pandas](https://pypi.org/project/pandas/)
+- [Numpy](https://pypi.org/project/numpy/)
 - [Argparse](https://pypi.org/project/argparse/)
-- [Cassandra Driver for Python](https://docs.datastax.com/en/developer/python-driver/3.19/installation/)
+- [Matplotlib](https://pypi.org/project/matplotlib/)
+- [Tqdm](https://pypi.org/project/tqdm/)
+
 
 
 ## Dataset
@@ -34,7 +38,13 @@ python init.py
 ```
 
 ## Data ingestion
-Ingest data from **'googleplaystore_clean.csv'** to the database:
+The following command will ingest the complete **'googleplaystore_clean.csv'** dataset (10840 rows) into the Cassandra database:
 ```bash
 python data_ingest.py
+```
+
+
+## Testing performances
+```bash
+python test_perf.py
 ```
