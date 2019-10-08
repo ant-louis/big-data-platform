@@ -3,6 +3,7 @@ from cassandra.auth import PlainTextAuthProvider
 import argparse
 import pandas as pd
 import uuid
+import timeit
 
 
 def connect_db(args):
@@ -19,10 +20,7 @@ def insert(df, session):
     """
     Insert the first 'nb_rows' rows of csv dataset to the database.
     """
-    for index, row in df.iterrows():
-        # if index >= 1000:
-        #     break
-        # else:
+    for i, row in df.iterrows():
         session.execute("""
         INSERT INTO mysimpbdp_coredms.apps (id, name, category, rating, reviews, size, installs, free, price_dollar, 
                                             content_rating, genres, last_updated, current_version, android_version)
@@ -30,6 +28,29 @@ def insert(df, session):
         (uuid.uuid1(), row['App'], row['Category'], row['Rating'], row['Reviews'], row['Size'], row['Installs'], row['Free'],
         row['Price_dollars'], row['Content Rating'], row['Genres'], row['Last Updated'], row['Current Ver'], row['Android Ver'])
         )
+
+
+def run(args):
+    # Connect to database
+    cluster, session = connect_db(args)
+
+    # Read data from csv to database
+    df = pd.read_csv(args.data, sep=',', index_col=0, dtype={'Rating': 'float64',
+                                                            'Reviews': 'int64',
+                                                            'Free': 'bool',
+                                                            'Price_dollars':'float64',
+                                                            'Last Updated':'str'})
+    
+    # Insert all dataframe into database and measure elapsed time
+    start = timeit.default_timer()
+    insert(df, session)
+    end = timeit.default_timer()
+    elapsed_time = end-start
+
+    # Close cluster
+    cluster.shutdown()
+
+    return elapsed_time
 
 
 def parse_arguments():
@@ -54,19 +75,6 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-    # Parse arguments
     args = parse_arguments()
-
-    # Connect to database
-    cluster, session = connect_db(args)
-
-    # Insert data from csv to database
-    df = pd.read_csv(args.data, sep=',', index_col=0, dtype={'Rating': 'float64',
-                                                            'Reviews': 'int64',
-                                                            'Free': 'bool',
-                                                            'Price_dollars':'float64',
-                                                            'Last Updated':'str'})
-    insert(df, session)
-
-    # Close cluster
-    cluster.shutdown()
+    t = run(args)
+    print(t)

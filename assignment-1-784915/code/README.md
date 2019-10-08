@@ -33,7 +33,8 @@ docker-compose up -d
 python init.py
 ```
 
-3. Ingest data from **'googleplaystore_clean.csv'** to the database:
+## Data ingestion
+Ingest data from **'googleplaystore_clean.csv'** to the database:
 ```bash
 python data_ingest.py
 ```
