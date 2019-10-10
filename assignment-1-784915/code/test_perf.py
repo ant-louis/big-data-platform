@@ -67,7 +67,7 @@ def convert_time2speed(times):
 def barplot(means, std, steps):
     """
     """
-    bars = tuple([str(i)+' processes' for i in steps])
+    bars = tuple([str(i)+' proc. ' for i in steps])
     x_pos = np.arange(len(bars))
     
     # Create bars
@@ -90,6 +90,7 @@ if __name__ == '__main__':
     # Run 1,5,...,N processes consecutively and store stats
     if args.runfrom is not None:
         steps = np.arange(args.runfrom, 0, -5)
+        steps = np.append(steps, 1)
         mean = np.zeros(len(steps))
         std = np.zeros(len(steps))
         for i, nb in enumerate(tqdm(steps)):
