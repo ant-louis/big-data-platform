@@ -63,13 +63,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser("Init the Cassandra database.")
 
     parser.add_argument("--address", type=str, default='0.0.0.0',
-                        help="List of contact points to try connecting for cluster discovery.")
+                        help="List of contact points to try connecting for cluster discovery. Default is [0.0.0.0].")
     parser.add_argument("--port", type=int, default=9042,
                         help="Server-side port to open connections to. Defaults to 9042.")
     parser.add_argument("--username", type=str, default='cassandra',
-                        help="Username required to connect to Cassandra database.")
+                        help="Username required to connect to Cassandra database. Default is 'cassandra'.")
     parser.add_argument("--password", type=str, default='cassandra',
-                        help="Password required to connect to Cassandra database.")
+                        help="Password required to connect to Cassandra database. Default is 'cassandra'.")
     parser.add_argument("--data", type=str, default='../data/googleplaystore_clean.csv',
                         help="Path to the dataset. Default is ../data/googleplaystore_clean.csv")
 

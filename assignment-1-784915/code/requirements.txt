@@ -1,0 +1,6 @@
+cassandra-driver
+numpy
+pandas
+argparse
+matplotlib
+tqdm

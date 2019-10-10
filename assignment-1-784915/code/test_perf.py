@@ -79,7 +79,7 @@ def barplot(means, std, steps):
     
     # Show graphic
     plt.tight_layout()
-    plt.savefig('plots/barplot.png')
+    plt.savefig('../reports/figures/barplot.png')
 
 
 
