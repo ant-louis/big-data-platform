@@ -1,0 +1,34 @@
+version: "3"
+
+networks:
+  my_shared_network: {}
+
+services: 
+  # First service (container): the server.
+  mysimbdp-server:
+    image: python:3.6-stretch
+    volumes:
+      - ./mysimbdp-server:/mysimbdp-server
+    ports:
+      - 1234:1234
+    networks: 
+      - my_shared_network
+    command: ["python", "-u", "./mysimbdp-server/server.py"]
+    #tty: true
+  
+  # Second service (container): the database.
+  mysimbdp-coredms:
+    image: cassandra:latest
+    volumes:
+      - ./mysimbdp-coredms:/var/lib/cassandra/data
+    ports:
+      - 9042:9042
+    environment:
+      - CASSANDRA_START_RPC=true
+      - CASSANDRA_CLUSTER_NAME=mysimbdp-coredms-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=datacenter1
+    networks: 
+      - my_shared_network
+    depends_on: 
+      - mysimbdp-server
