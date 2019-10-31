@@ -1,0 +1,7 @@
+flask 
+flask-jsonpify 
+flask-restful
+cassandra-driver
+numpy
+pandas
+argparse

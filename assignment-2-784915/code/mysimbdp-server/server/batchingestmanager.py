@@ -49,7 +49,7 @@ def ingest(client_id):
     """
     # Get files of client saved on the server
     files_path = client_id+'/files/'
-    files = [f for f in listdir(files_path)]
+    files = [f for f in listdir(files_path) if path.isfile(path.join(files_path, f))]
 
     # Get batchingestapp of client
     ingestapp_path = client_id +'/clientbatchingestapp.py'

@@ -65,8 +65,8 @@ def parse_arguments():
                     help="Path to the data to ingest.")
     parser.add_argument("client_id", type=str,
                         help="Client id.")
-    parser.add_argument("--address", type=str, default='0.0.0.0',
-                        help="List of contact points to try connecting for cluster discovery. Default is [0.0.0.0].")
+    parser.add_argument("--address", type=str, default='db',
+                        help="List of contact points to try connecting for cluster discovery. Default is db.")
     parser.add_argument("--port", type=int, default=9042,
                         help="Server-side port to open connections to. Defaults to 9042.")
     parser.add_argument("--username", type=str, default='cassandra',

@@ -120,8 +120,10 @@ if __name__ == "__main__":
 
     # Login
     client_id = login(args.username, args.password)
-    if client_id == -1:
+    if client_id is '-1':
         print("Login failed.")
+    else:
+        print("Login suceeded.")
 
     # Get constraints of client
     constraints = get_constraints(client_id)
@@ -136,9 +138,9 @@ if __name__ == "__main__":
     if result_fetch != 0:
         print("Error while fetching data.")
     else:
+        print("Fetching data suceeded. Now pushing it to mysimbdp-coredms...")
         result_ingest = ingest(client_id)
-        print(result_ingest)
-        if result_ingest == 0:
+        if result_ingest is '0':
             print("Ingestion completed.")
         else:
             print("Error during ingestion.")
