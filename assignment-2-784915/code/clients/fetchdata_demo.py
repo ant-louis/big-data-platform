@@ -2,6 +2,7 @@ import urllib.request
 from os import listdir, path, system
 import argparse
 import json
+import timeit
 
 
 def login(username, password):
@@ -99,9 +100,12 @@ def fetch(files, client_id):
     return 0
 
 
-def run(args):
+def run(args, i, return_dict):
     """
     """
+    # Start timer
+    start = timeit.default_timer()
+
     # Login
     client_id = login(args.username, args.password)
     if client_id is '-1':
@@ -128,4 +132,11 @@ def run(args):
             print("Ingestion completed.")
         else:
             print("Error during ingestion.")
+
+    # End timer
+    end = timeit.default_timer()
+    elapsed_time = end-start
+
+    # Store result of process i in shared variable return_dict
+    return_dict[i] = elapsed_time
     
