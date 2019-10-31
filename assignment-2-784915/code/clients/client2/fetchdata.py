@@ -105,8 +105,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser("Init the Cassandra database.")
-    parser.add_argument("--username", type=str, default='john_doe',
-                        help="Username of client 1. Default is john_doe.")
+    parser.add_argument("--username", type=str, default='jane_doe',
+                        help="Username of client 1. Default is jane_doe.")
     parser.add_argument("--password", type=str, default='1234',
                         help="Password of client 1. Default is 1234.")
     parser.add_argument("--indir", type=str, default='client-input-directory/',

@@ -2,7 +2,6 @@ import urllib.request
 from os import listdir, path, system
 import argparse
 import json
-import timeit
 
 
 def login(username, password):
@@ -100,25 +99,9 @@ def fetch(files, client_id):
     return 0
 
 
-def parse_arguments():
+def run(args):
     """
-    :return: the different arguments of the command line.
     """
-    parser = argparse.ArgumentParser("Init the Cassandra database.")
-    parser.add_argument("--username", type=str, default='john_doe',
-                        help="Username of client 1. Default is john_doe.")
-    parser.add_argument("--password", type=str, default='1234',
-                        help="Password of client 1. Default is 1234.")
-    parser.add_argument("--indir", type=str, default='client-input-directory/',
-                        help="Input directory of client 1. Default is 'client-input-directory.")
-    args, _ = parser.parse_known_args()
-    return args
-
-
-def run(args, i, return_dict):
-    # Start timer
-    start = timeit.default_timer()
-    
     # Login
     client_id = login(args.username, args.password)
     if client_id is '-1':
@@ -145,21 +128,4 @@ def run(args, i, return_dict):
             print("Ingestion completed.")
         else:
             print("Error during ingestion.")
-    
-    # End timer
-    end = timeit.default_timer()
-    elapsed_time = end-start
-
-    # Store result of process i in shared variable return_dict
-    return_dict[i] = elapsed_time
-
-    return elapsed_time
-
-
-if __name__ == "__main__":
-    # Parse arguments
-    args = parse_arguments()
-
-    # Time of total ingestion from input-directory to mysimbdp-coredms
-    print("Total ingestion time: {}".format(run(args, 0, [0])))
     
