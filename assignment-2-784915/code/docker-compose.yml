@@ -6,21 +6,21 @@ networks:
 services: 
   # First service (container): the server.
   mysimbdp-server:
-    image: python:3.6-stretch
-    volumes:
-      - ./mysimbdp-server:/mysimbdp-server
+    container_name: server
+    build:
+      context: ./mysimbdp-server/
+      dockerfile: Dockerfile
     ports:
-      - 1234:1234
-    networks: 
+      - 5000:5000
+    networks:
       - my_shared_network
-    command: ["python", "-u", "./mysimbdp-server/server.py"]
-    #tty: true
   
   # Second service (container): the database.
   mysimbdp-coredms:
+    container_name: db
     image: cassandra:latest
     volumes:
-      - ./mysimbdp-coredms:/var/lib/cassandra/data
+      - ./mysimbdp-coredms/db:/var/lib/cassandra/data
     ports:
       - 9042:9042
     environment:
