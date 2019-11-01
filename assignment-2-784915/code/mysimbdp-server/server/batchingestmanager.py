@@ -2,6 +2,8 @@
 from flask import Flask, request, jsonify
 from os import listdir, path, system
 import json
+import logging
+import timeit
 
 
 app = Flask(__name__)
@@ -47,6 +49,9 @@ def ingest(client_id):
     """
     Once fetching is done, ingest data to mysimbdp-coredms.
     """
+    # Config the log file
+    logging.basicConfig(level=logging.INFO, filename='server.log', filemode='a', format='%(asctime)s :: %(levelname)s :: %(name)s : %(message)s')
+
     # Get files of client saved on the server
     files_path = client_id+'/files/'
     files = [f for f in listdir(files_path) if path.isfile(path.join(files_path, f))]
@@ -56,10 +61,27 @@ def ingest(client_id):
 
     # Ingest each file
     for f in files:
+        # Start timer
+        start = timeit.default_timer()
+
+        # Get size of file
+        size = path.getsize(files_path+f)
+
+        # Ingestion
         result = system("python "+ingestapp_path+" "+files_path+f+" "+client_id)
+
+        # End timer
+        end = timeit.default_timer()
+        elapsed_time = end-start
+
+        # Ingestion failed
         if result != 0:
-            print('Problem while ingesting {}.'.format(f))
+            logging.warning('Problem while ingesting {}.'.format(f))
             return '-1'
+        else:
+            # Ingestion suceed
+            logging.info('{} was correctly ingested into mysimbdp-coredms. File size: {} KB -- Total ingestion time: {} -- '.format(f, size, elapsed_time))
+
     return '0'
 
 

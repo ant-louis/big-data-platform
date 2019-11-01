@@ -5,3 +5,4 @@ cassandra-driver
 numpy
 pandas
 argparse
+pika

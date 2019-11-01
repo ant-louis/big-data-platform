@@ -13,7 +13,7 @@ def parse_arguments():
     """
     :return: the different arguments of the command line.
     """
-    parser = argparse.ArgumentParser("Init the Cassandra database.")
+    parser = argparse.ArgumentParser()
 
     parser.add_argument("--nb_clients", type=int, choices=[1,2], default=1,
                         help="Number of clients to run the tests.")

@@ -10,6 +10,8 @@ services:
     build:
       context: ./mysimbdp-server/
       dockerfile: Dockerfile
+    volumes:
+      - ./mysimbdp-server/server:/server
     ports:
       - 5000:5000
     networks:
@@ -32,3 +34,21 @@ services:
       - my_shared_network
     depends_on: 
       - mysimbdp-server
+
+  # Third service (container): the message broker.
+  rabbitmq:
+      image: rabbitmq:3
+      container_name: rabbitapp
+      hostname: rabbitapp
+      ports:
+          - 5672:5672
+          - 15672:15672
+      networks: 
+      - my_shared_network
+      volumes:
+          - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
+      environment:
+          RABBITMQ_ERLANG_COOKIE: cluster_cookie
+          RABBITMQ_DEFAULT_USER: rabbitmq
+          RABBITMQ_DEFAULT_PASS: rabbitmq
+          RABBITMQ_DEFAULT_VHOST: /
