@@ -1,0 +1,63 @@
+2019-10-31 21:45:23,801 :: INFO :: root : .DS_Store was correctly ingested into mysimbdp-coredms. File size: 6148 KB -- Total ingestion time: 0.9351394999976037 -- 
+2019-10-31 21:45:30,074 :: INFO :: root : sample1.csv was correctly ingested into mysimbdp-coredms. File size: 136671 KB -- Total ingestion time: 6.2723493999983475 -- 
+2019-10-31 21:45:33,383 :: INFO :: root : sample11.csv was correctly ingested into mysimbdp-coredms. File size: 98060 KB -- Total ingestion time: 3.3079326000006404 -- 
+2019-10-31 21:45:36,718 :: INFO :: root : sample10.csv was correctly ingested into mysimbdp-coredms. File size: 119443 KB -- Total ingestion time: 3.3342161000000488 -- 
+2019-10-31 21:45:40,000 :: INFO :: root : sample8.csv was correctly ingested into mysimbdp-coredms. File size: 116947 KB -- Total ingestion time: 3.2807919000006223 -- 
+2019-10-31 21:45:43,499 :: INFO :: root : sample9.csv was correctly ingested into mysimbdp-coredms. File size: 119116 KB -- Total ingestion time: 3.4981217999993532 -- 
+2019-10-31 21:45:43,500 :: INFO :: werkzeug : 192.168.0.1 - - [31/Oct/2019 21:45:43] "GET /ingest/dir1 HTTP/1.1" 200 -
+2019-10-31 21:45:52,658 :: INFO :: werkzeug : 192.168.0.1 - - [31/Oct/2019 21:45:52] "GET /login/jane_doe/1234 HTTP/1.1" 200 -
+2019-10-31 21:45:52,665 :: INFO :: werkzeug : 192.168.0.1 - - [31/Oct/2019 21:45:52] "GET /constraints/dir2 HTTP/1.1" 200 -
+2019-10-31 21:45:56,531 :: INFO :: root : sample1.csv was correctly ingested into mysimbdp-coredms. File size: 136671 KB -- Total ingestion time: 3.3481094999988272 -- 
+2019-10-31 21:45:59,491 :: INFO :: root : sample11.csv was correctly ingested into mysimbdp-coredms. File size: 98060 KB -- Total ingestion time: 2.953883300000598 -- 
+2019-10-31 21:46:02,527 :: INFO :: root : sample10.csv was correctly ingested into mysimbdp-coredms. File size: 119443 KB -- Total ingestion time: 3.0355846000020392 -- 
+2019-10-31 21:46:05,493 :: INFO :: root : sample8.csv was correctly ingested into mysimbdp-coredms. File size: 116947 KB -- Total ingestion time: 2.9652504999976372 -- 
+2019-10-31 21:46:08,512 :: INFO :: root : sample9.csv was correctly ingested into mysimbdp-coredms. File size: 119116 KB -- Total ingestion time: 3.0180634999996983 -- 
+2019-10-31 21:46:08,513 :: INFO :: werkzeug : 192.168.0.1 - - [31/Oct/2019 21:46:08] "GET /ingest/dir2 HTTP/1.1" 200 -
+2019-11-01 00:07:06,040 :: ERROR :: batchingestmanager : Exception on /login/john_doe/1234 [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 2446, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1951, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1820, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.6/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1949, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1935, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "batchingestmanager.py", line 17, in login
+FileNotFoundError: [Errno 2] No such file or directory: 'users.json'
+2019-11-01 00:07:06,042 :: INFO :: werkzeug : 192.168.0.1 - - [01/Nov/2019 00:07:06] "GET /login/john_doe/1234 HTTP/1.1" 500 -
+2019-11-01 00:07:38,815 :: ERROR :: batchingestmanager : Exception on /login/john_doe/1234 [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 2446, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1951, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1820, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.6/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1949, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.6/site-packages/flask/app.py", line 1935, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "batchingestmanager.py", line 17, in login
+FileNotFoundError: [Errno 2] No such file or directory: 'users.json'
+2019-11-01 00:07:38,816 :: INFO :: werkzeug : 192.168.0.1 - - [01/Nov/2019 00:07:38] "GET /login/john_doe/1234 HTTP/1.1" 500 -
+2019-11-01 00:23:20,236 :: INFO :: root : .DS_Store was correctly ingested into mysimbdp-coredms. File size: 6148 KB -- Total ingestion time: 1.6810037000032025 -- 
+2019-11-01 00:23:29,537 :: INFO :: root : sample1.csv was correctly ingested into mysimbdp-coredms. File size: 136671 KB -- Total ingestion time: 9.334252400003606 -- 
+2019-11-01 00:23:34,968 :: INFO :: root : sample11.csv was correctly ingested into mysimbdp-coredms. File size: 98060 KB -- Total ingestion time: 5.4302078000037 -- 
+2019-11-01 00:23:41,049 :: INFO :: root : sample10.csv was correctly ingested into mysimbdp-coredms. File size: 119443 KB -- Total ingestion time: 6.0803736000016215 -- 
+2019-11-01 00:23:47,044 :: INFO :: root : sample8.csv was correctly ingested into mysimbdp-coredms. File size: 116947 KB -- Total ingestion time: 5.976300700000138 -- 
+2019-11-01 00:23:52,776 :: INFO :: root : sample9.csv was correctly ingested into mysimbdp-coredms. File size: 119116 KB -- Total ingestion time: 5.731452300002275 -- 
+2019-11-01 00:23:52,778 :: INFO :: werkzeug : 192.168.32.1 - - [01/Nov/2019 00:23:52] "GET /ingest/dir1 HTTP/1.1" 200 -
+2019-11-01 10:25:27,848 :: INFO :: root : .DS_Store was correctly ingested into mysimbdp-coredms. File size: 6148 KB -- Total ingestion time: 1.577780018999988 -- 
+2019-11-01 10:25:31,035 :: INFO :: root : sample1.csv was correctly ingested into mysimbdp-coredms. File size: 136671 KB -- Total ingestion time: 3.207698401000016 -- 
+2019-11-01 10:25:33,241 :: INFO :: root : sample11.csv was correctly ingested into mysimbdp-coredms. File size: 98060 KB -- Total ingestion time: 2.20521227399999 -- 
+2019-11-01 10:25:35,514 :: INFO :: root : sample10.csv was correctly ingested into mysimbdp-coredms. File size: 119443 KB -- Total ingestion time: 2.2723471019999977 -- 
+2019-11-01 10:25:37,386 :: INFO :: root : sample8.csv was correctly ingested into mysimbdp-coredms. File size: 116947 KB -- Total ingestion time: 1.8715434020000146 -- 
+2019-11-01 10:25:39,166 :: INFO :: root : sample9.csv was correctly ingested into mysimbdp-coredms. File size: 119116 KB -- Total ingestion time: 1.7795737980000013 -- 
+2019-11-01 10:25:39,167 :: INFO :: werkzeug : 172.19.0.1 - - [01/Nov/2019 10:25:39] "GET /ingest/dir1 HTTP/1.1" 200 -

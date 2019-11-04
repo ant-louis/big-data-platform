@@ -1,0 +1,5 @@
+{
+    "max_file_size":200,
+    "max_nb_files":5,
+    "allowed_file_format":["csv"]
+}
