@@ -19,7 +19,7 @@ def init_keyspace(session):
     """
     # Creating keyspace
     session.execute("""
-    CREATE  KEYSPACE IF NOT EXISTS mysimpbdp_coredms
+    CREATE  KEYSPACE IF NOT EXISTS mysimbdp_coredms
     WITH REPLICATION = {
     'class' : 'SimpleStrategy',
     'replication_factor' : 1
@@ -28,7 +28,7 @@ def init_keyspace(session):
     
     # Creating tables
     session.execute("""
-    CREATE TABLE IF NOT EXISTS mysimpbdp_coredms.data(
+    CREATE TABLE IF NOT EXISTS mysimbdp_coredms.data(
     id UUID PRIMARY KEY,
     station_id bigint,
     datapoint_id int,
@@ -41,14 +41,14 @@ def init_keyspace(session):
     """)
     
     session.execute("""
-    CREATE TABLE IF NOT EXISTS mysimpbdp_coredms.sensors(
+    CREATE TABLE IF NOT EXISTS mysimbdp_coredms.sensors(
     id int PRIMARY KEY,
     sensor varchar
     );
     """)
     
     session.execute("""
-    CREATE TABLE IF NOT EXISTS mysimpbdp_coredms.alarms(
+    CREATE TABLE IF NOT EXISTS mysimbdp_coredms.alarms(
     id int PRIMARY KEY,
     alarm varchar
     );
@@ -81,6 +81,7 @@ if __name__ == "__main__":
 
     # Init keyspace
     init_keyspace(session)
+    print("Keyspace mysimbdp-coredms created with tables Sensors and Alarms.")
 
     # Close cluster
     cluster.shutdown()
