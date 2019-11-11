@@ -32,7 +32,7 @@ def split_csv(filename):
                     output_file.close()
                 
                 # Generate a subset name
-                file_name = '../data/subdatasets/subdataset_' + str(counter_sid) + '.csv'
+                file_name = '../../data/subdatasets/subdataset_' + str(counter_sid) + '.csv'
                 counter_sid += 1
 
                 # Create the file
@@ -49,5 +49,5 @@ def split_csv(filename):
 
 
 if __name__ == "__main__":
-    filename = '../data/bts-data-alarm-2017.csv'
+    filename = '../../data/bts-data-alarm-2017.csv'
     split_csv(filename)
