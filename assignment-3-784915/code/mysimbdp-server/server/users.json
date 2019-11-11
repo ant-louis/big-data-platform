@@ -1,4 +1,0 @@
-{
-    "user1":{"username":"john_doe", "password":"1234", "client_dir":"dir1"},
-    "user2":{"username":"jane_doe", "password":"1234", "client_dir":"dir2"}
-}
