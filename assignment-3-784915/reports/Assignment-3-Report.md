@@ -86,3 +86,17 @@ Notice that in practice, the consumer should also have the choice to impose whic
 
 
 ### 4. Important performance metrics for the streaming analytics
+
+Below are listed some important metrics that should be taken into account:
+* Backlogged Input Events: Number of input events that are backlogged.
+* Data Conversion Errors: Number of output events that could not be converted to the expected output schema.
+* Early Input Events: Events whose application timestamp is earlier than their arrival time by more than 5 minutes.
+* Input Deserialization Errors: Number of input events that could not be deserialized.
+* Input Event Bytes: Amount of data received by the Stream Analytics job, in bytes. This can be used to validate that events are being sent to the input source.
+* Input Events: Number of records deserialized from the input events.
+* Input Sources Received: Number of messages received by the job.
+* Late Input Events: Events that arrived later than the configured late arrival tolerance window.
+* Out-of-Order Events: Number of events received out of order that were either dropped or given an adjusted timestamp.
+* Output Events: Amount of data sent by the Stream Analytics job to the output target, in number of events.
+* Runtime Errors: Total number of errors related to query processing.
+* SU % Utilization: The utilization of the Streaming Unit(s) assigned to a job.
