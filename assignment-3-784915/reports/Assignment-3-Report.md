@@ -5,10 +5,9 @@
 ### 1. Dataset selection and analytics for the customer
 
 #### Dataset
-This project uses the BTS dataset provided by BachPhu, a company developing IoT solution in Vietnam. It is a collection of sensors data from base stations.
-The data structure is as follow:
+For this project, I decided to use the BTS dataset provided by BachPhu, a company developing IoT solution in Vietnam. It is a collection of sensors data from base stations. The data structure is as follow:
 * *station_id*: the id of the stations
-* *datapoint_id: the id of the sensor (data point)
+* *datapoint_id*: the id of the sensor (data point)
 * *alarm_id*: the id of the alarm
 * *event_time*: the time at which the event occurs
 * *value*: the value of the measurement of the datapoint
@@ -18,35 +17,35 @@ The data structure is as follow:
 
 Note that the given dataset was split into different smaller datasets, each leveraging data about a given station (split according to the station_id). 
 
-This dataset was chosen for multiple reasons. First of all, it is simple, clean and easy-to-use, and its size is reasonable. Then, it is a perfect fit for streaming analytics applications. Indeed, in each dataset, each row represents a certain data event recorded at a given time (*event_time* represents the timestamp of the data event). Moreover, these data came from sensors that lend themselves well to analytics with near-realtime ingestion being really suitable to sensors.
+This dataset was chosen for multiple reasons. First of all, it is simple, clean and easy-to-use, and its size is reasonable (25.2 MB). Then, it is a good fit for streaming analytics. Indeed, in each dataset, each row represents a certain data event recorded at a given time (*event_time* represents the timestamp of the data event). Moreover, these data came from sensors that lend themselves well to analytics with near-realtime ingestion being really suitable to sensors.
 
 
 #### Analytics
-Now, let's give some example of analytics that could be performed in our application.
+Now, let's give some example of analytics that could be performed with our dataset.
 
 **(i) Streaming analytics which analyzes streaming data from the customer**
-- Analyzing the frequency of alarms: how often has a given alarm been activated in a given station?
-- Analyzing the number of times the threshold of a given sensor has been exceeded: how often has the the threshold of a given sensor been exceeded in a given station?
-- Analyzing the frequency of the data points for a given sensor: at which frequency are the data points of a given sensor registered in a given station?
-- Analyzing the consistency of the data points: how stable are the values of a given sensor in a given station, are there outliers?
-- Analyzing interesting values of a given sensor: what is the current maximum/minimum/mean value of a given sensor for the stream?
+- Analyzing the frequency of alarms activations in a given station for each sensor. This could help detect which machine in the station might be defective when a high frequency is noticed.
+- Checking if an alarm has been set. This simple but nevertheless practical analytics could for example notify the consumer with a warning.
+- Analyzing the frequency of incoming data points for each sensor in a given station. This would be useful for detecting missing values due to a time out of the sensor.
+- Keeping track of interesting values related to each sensor such as the (online) maximum/minimum/mean value of each sensor in a given station.
+- Analyzing the consistency of the data points. This feature would obviously be useful to detect outliers in the incoming data and removing noise. Notice that it either requires a sufficiently large window or comparison could be made with the currently tracked mean value for example.
 - ...
 
 **(ii) Batch analytics which analyzes historical results outputted by the streaming analytics**
-- Analyzing among all stations which types of alarm have been the most activated.
+- Analyzing among all stations which types of alarm have been the most activated during a given period of time.
 - Analyzing which stations have the bigger number of alarm activations for a given sensor.
-- Analyzing among all stations which sensor exceeds the most its threshold.
+- Analyzing in a given station which sensors activate the most the alarms.
+- Analyzing for a given alarm in a given station at which moments of the day it is the most activated.
 - ...
 
-In brief, streaming analytics is about getting statistics about data analyzed in a given window (frequency, mean, max) for individual stations. On the other hand, batch analytics will analyze these statistics by plotting for example histograms and graphs. 
+In brief, streaming analytics can be very useful for reliability analysis and anomaly detection, while batch analytics can further analyze the outputted statistics by plotting detailed histograms and graphs.
 
 
 ## 2. Discussion about streaming analytics
 
 **(i) Should the analytics handle keyed or non-keyed data streams for the customer data?**
-* In the case of non-keyed streams, all elements in the stream will be processed together and the user-defined function will have access to all elements in a stream. In our case, one can consider that each consumer represents a given station (defined by the station_id) and data has in a sense already been partitioned by this station_id (see Deployment report). Thus, non-keyed streams would be suitable for our application. However, the downside of this stream type is that it gives no parallelism and only one machine in the cluster will be able to execute our code. Hence, we will use keyed streams that are explained just below.
 
-* In the case of a keyed stream, the stream can be partioned into multiple independent streams by a key. For example, our platform could receive data coming from one particular consumer (defined by his *station_id*) but could further be partitioned (for example with the *datapoint_id* or the *alarm_id*). That way, when a window will be processed in a keyed stream, the user-defined function will only have access to items with the same key, hence performing analytics on all elements of a specific key which could allow us to perform more specific computations than when using non-keyed streams. Another advantage of working with keyed streams is that it allows to parallelize work. Finally, the windows could be set specifically for each keyed stream which is really interesting as discussed in Question 3 as, if we decide to group the stream by *sensor_id*, time window would be more suitable for a sensor with a very high emission frequency but a sized window would be a better match for a sensor only emitting a few data points every hour for e.g.
+In the case of non-keyed streams, all elements in the stream are processed together and the user-defined function has access to all elements in a stream. At the opposite, in the case of a keyed stream, the stream can be partioned into multiple independent streams by a key. That way, when a window is processed in a keyed stream,the user-defined function only has access to items with the same key. In our case, where each station is equipped with multiple sensors linked to a certain number of alarms, keyed streams seem to be more suitable. Indeed, partitioning the stream according to the *datapoint_id* or *alarm_id* would allow us to gain in accuracy and flexibility in our analytics. We could then adapt the different analytics and window sizes (discussed in Question 3) in each stream in function of the characteristics of the given sensors or alarms, which makes more sense. Another advantage of working with keyed streams is that it allows to parallelize work, which is not possible for non-keyed streams where only one machine in the cluster will be able to execute our code.
 
 
 **(ii) Which types of delivery guarantees should be suitable?**
@@ -65,17 +64,25 @@ Below are listed some guarantees that our platform could give to the customers:
 
 - Guaranteeing data safety: ensuring the customers to keep their data safe and private.
 
+- Processing and responding instantaneously: achieving the near-realtime response with minimal overhead for high-volume data streams.
+
 ### 3. Types of time and types of windows to consider
 
 **(i) Types of time to consider in stream processing**
 
-The timestamps 
+The chosen dataset already provides timestamps which characterizes the moment when the measure was taken. It is thus a good idea to use them for our stream processing. Another alternative would be to re-generate timestamps when the messages arrive in the platform. However, this alternative is far less robust than the previously mentioned one since we would take into account the "message received time" and not the "measure creation time". One can easily figuring out scenarios where this could be a problem for our analytics. For example, let's imagine for an instant that the network crashes for multiple hours, while the sensors continue to measure values and store them temporarily in a buffer pending an answer for the network. When connection is restored, all the buffered messages are sent together and timestamps are created on the server side when they are received. Now, our streaming analytics might detect the activation of an alarm and send the consumer a warning, while this activation happened hours ago. This example emphasizing the possible delays in the network shows properly the importance for the timestamps to be created on the device side. In addition, this requirement is also necessary for handling out-of-order data.
 
 
 
 **(ii) Types of windows to develop for the analytics**
 
+In this project, I chose to implement sliding windows of fixed sizes. Hence, a given window in a keyed stream will contain *n* data points from which the first half will already have been analyzed, processed and ingested into the database, and the second half not yet. This mechanism allows us to perform consistency check among "past" and "future" values which is very useful in an IoT context.
+
+Now, two kinds of windows might be considered: timing windows and fixed size windows. A timing window will consider a given interval of time in which the elements where timestamps correspond will be processed. At the opposite, fixed size window will take into account a given number of data points, whatever their timestamps, and process these points. Both types of windows might be suitable for our application. However, it also depends on the intrinsic characteristics of the sensors, particularly of their frequency of emission. This strengthens even more my choice to consider keyed streams, as independent windows can be set individually for each sensor. Indeed, if a sensor only emits a few data points every hour, then it wouldn't make any sense to consider a timing window of a few seconds. In that case, a larger interval of time must be considered, or a fixed size window should be chosen.
+
+It is difficult to draw out these types of windows as they both might be suitable for our dataset. For the ease of this project, I chose to use fixed size windows of a given number of elements *n*.
+
+Notice that in practice, the consumer should also have the choice to impose which kind of windows better match his application, as he is the one to exactly know the data he is sending to the platform.
 
 
-
-timestamp, taille de la window et qu'est ce que je survole (keyed survoler que pour un capteur), l'utilisateur devrait lui-même spécifier quel genre de window il veut (parametres) ou du moins do
+### 4. Important performance metrics for the streaming analytics
