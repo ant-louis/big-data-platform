@@ -20,9 +20,9 @@ services:
       - my_shared_network
 
   rabbitmq:
-      image: rabbitmq:3
+      image: rabbitmq:3-management
       container_name: rabbit
-      hostname: rabbit
+      hostname: rabbit_host
       ports:
           - 5672:5672
           - 15672:15672
@@ -31,7 +31,5 @@ services:
       volumes:
           - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
       environment:
-          RABBITMQ_ERLANG_COOKIE: cluster_cookie
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
-          RABBITMQ_DEFAULT_VHOST: /

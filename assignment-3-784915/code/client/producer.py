@@ -9,8 +9,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--queue_name', type=str, default='test',
-                        help='Name of the queue. Default is test.')
+    parser.add_argument('--queue_name', type=str, default='client1',
+                        help='Name of the queue. Default is client1.')
     parser.add_argument('--input_file', type=str, default='../../data/subdatasets/subdataset_0.csv',
                         help='Path to the csv data file. Default is ../../data/subdatasets/subdataset_0.csv')
     args = parser.parse_args()
@@ -21,7 +21,7 @@ def run(args):
     """
     """
     # Connect to the channel
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     channel.queue_declare(queue=args.queue_name, durable=True)  # mark both the queue and messages as durable to make sure that messages aren't lost.
 
@@ -46,7 +46,7 @@ def run(args):
 # def delete(args):
 #     """
 #     """
-#     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbit'))
+#     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 #     channel = connection.channel()
 #     channel.queue_delete(queue=args.queue_name)
 #     connection.close()
