@@ -23,7 +23,7 @@ def run(args):
     # Connect to the channel
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=args.queue_name)
+    channel.queue_declare(queue=args.queue_name, durable=True)  # mark both the queue and messages as durable to make sure that messages aren't lost.
 
     # Send data line by line
     f = open(args.input_file, 'r')
@@ -31,11 +31,25 @@ def run(args):
     for line in f:
         print ("Send a line")
         print ("-----------------------")
-        channel.basic_publish(exchange='', routing_key=args.queue_name, body=line)
+        channel.basic_publish(exchange='',
+                                routing_key=args.queue_name,
+                                body=line,
+                                properties=pika.BasicProperties(
+                                    delivery_mode = 2, # make message persistent
+                            ))
         time.sleep(1)
 
     # Close connection
     connection.close()
+
+
+# def delete(args):
+#     """
+#     """
+#     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+#     channel = connection.channel()
+#     channel.queue_delete(queue=args.queue_name)
+#     connection.close()
 
 
 if __name__ == "__main__":
