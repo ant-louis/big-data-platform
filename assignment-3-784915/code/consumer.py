@@ -9,8 +9,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--queue_name', type=str, help='queue name')
-    parser.add_argument('--input_file', help='csv data file')
+    parser.add_argument('--queue_name', type=str, default='test',
+                        help='Name of the queue. Default is test.')
     args = parser.parse_args()
     return args
 
@@ -27,11 +27,10 @@ def run(args):
     # Connect to the channel
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=args.queue, durable=False)
-
+    channel.queue_declare(queue=args.queue_name)
 
     # Consume messages
-    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue=args.queue_name, on_message_callback=callback, auto_ack=True)
     print('Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
 
