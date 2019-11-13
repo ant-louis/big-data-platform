@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import pika, os, logging, sys, time
 import argparse
+import random
+
 
 def parse_arguments():
     """
@@ -13,28 +15,30 @@ def parse_arguments():
     return args
 
 
+def callback(ch, method, properties, body):
+    """
+    """
+    print ("Received:", body, sep=" ")
+
+
 def run(args):
     """
     """
     # Connect to the channel
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=args.queue, durable=True)
+    channel.queue_declare(queue=args.queue, durable=False)
 
-    # Send data line by line
-    f = open(args.input_file, 'r')
-    f.readline()
-    for line in f:
-        print ("Send a line")
-        print ("-----------------------")
-        channel.basic_publish(exchange='', routing_key=args.queue_name, body=line)
-        time.sleep(1)
+
+    # Consume messages
+    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+    print('Waiting for messages. To exit press CTRL+C')
+    channel.start_consuming()
 
     # Close connection
     connection.close()
 
 
 if __name__ == "__main__":
-    # Parse arguments
     args = parse_arguments()
     run(args)
