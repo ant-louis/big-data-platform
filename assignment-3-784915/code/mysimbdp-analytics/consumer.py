@@ -28,7 +28,7 @@ def run(args):
     """
     """
     # Connect to the channel
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
     channel = connection.channel()
     channel.queue_declare(queue=args.queue_name, durable=True)  # durable in order for both the queue and messages not to be lost  in case of crashes.
 

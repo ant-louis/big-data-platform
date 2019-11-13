@@ -4,20 +4,6 @@ networks:
   my_shared_network: {}
 
 services: 
-  # # First service (container): the server.
-  # mysimbdp-server:
-  #   container_name: server
-  #   build:
-  #     context: ./mysimbdp-server/
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./mysimbdp-server/server:/server
-  #   ports:
-  #     - 5000:5000
-  #   networks:
-  #     - my_shared_network
-  
-  # Second service (container): the database.
   mysimbdp-coredms:
     container_name: db
     image: cassandra:latest
@@ -32,23 +18,20 @@ services:
       - CASSANDRA_DC=datacenter1
     networks: 
       - my_shared_network
-    # depends_on: 
-    #   - mysimbdp-server
 
-  # # Third service (container): the message broker.
-  # rabbitmq:
-  #     image: rabbitmq:3
-  #     container_name: rabbitapp
-  #     hostname: rabbitapp
-  #     ports:
-  #         - 5672:5672
-  #         - 15672:15672
-  #     networks: 
-  #     - my_shared_network
-  #     volumes:
-  #         - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
-  #     environment:
-  #         RABBITMQ_ERLANG_COOKIE: cluster_cookie
-  #         RABBITMQ_DEFAULT_USER: rabbitmq
-  #         RABBITMQ_DEFAULT_PASS: rabbitmq
-  #         RABBITMQ_DEFAULT_VHOST: /
+  rabbitmq:
+      image: rabbitmq:3
+      container_name: rabbit
+      hostname: rabbit
+      ports:
+          - 5672:5672
+          - 15672:15672
+      networks: 
+      - my_shared_network
+      volumes:
+          - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
+      environment:
+          RABBITMQ_ERLANG_COOKIE: cluster_cookie
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+          RABBITMQ_DEFAULT_VHOST: /
