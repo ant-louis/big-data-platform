@@ -1,14 +1,18 @@
 from kafka import KafkaConsumer
+import json
 
-# continuous loop
-var = 1
-while var == 1:
+
+while True:
 
     # initialize consumer to given topic and broker
-    consumer = KafkaConsumer('test_topic',
-                            group_id='consumer-1',
-                            bootstrap_servers='localhost:9093')
-
-    # loop and print messages
-    for msg in consumer:
-        print (msg)
+    consumer = KafkaConsumer(
+        'test_topic',
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        group_id='my-group-1',
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+        bootstrap_servers='localhost:9093')
+    
+    # Loop and print messages
+    for m in consumer:
+        print(m.value)
