@@ -7,7 +7,7 @@ services:
     container_name: db
     image: cassandra:latest
     volumes:
-      - ./mysimbdp-coredms/db:/var/lib/cassandra/data
+      - #./mysimbdp-coredms/db:/var/lib/cassandra/data
     ports:
       - 9042:9042
     environment:
