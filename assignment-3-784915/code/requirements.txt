@@ -4,4 +4,4 @@ pandas
 argparse
 matplotlib
 tqdm
-pika
+kafka-python
