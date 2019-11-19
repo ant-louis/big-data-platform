@@ -4,12 +4,13 @@
 The following section lists the requirements in order to start running the project.
 
 This project is based on Docker containers, so ensure to have [Docker](https://docs.docker.com/v17.12/install/) installed on your machine. In addition, your machine should dispose from a working version of Python 3.6 as well as the following packages:
-- [Cassandra Driver](https://docs.datastax.com/en/developer/python-driver/3.19/installation/)
-- [Pandas](https://pypi.org/project/pandas/)
-- [Numpy](https://pypi.org/project/numpy/)
-- [Argparse](https://pypi.org/project/argparse/)
-- [Matplotlib](https://pypi.org/project/matplotlib/)
-- [Tqdm](https://pypi.org/project/tqdm/)
+- [cassandra-driver](https://pypi.org/project/cassandra-driver/)
+- [pandas](https://pypi.org/project/pandas/)
+- [numpy](https://pypi.org/project/numpy/)
+- [argparse](https://pypi.org/project/argparse/)
+- [matplotlib](https://pypi.org/project/matplotlib/)
+- [tqdm](https://pypi.org/project/tqdm/)
+- [kafka-python](https://pypi.org/project/kafka-python/)
 
 These libraries can be installed automatically by running the following command in the *code/* repository:
 ```bash
@@ -17,11 +18,11 @@ pip install -r requirements.txt
 ```
 
 ## Launching the Docker containers
-In order to run the containers, run the following command in the *code/* repository:
+In order to run the containers, run the following command in the *code/deploy-docker/* repository:
 ```bash
 make install
 ```
-Notice that downloading and installing the different images might take some time. Also, waiting a couple of minutes before executing operations on the Cassandra container is advised.
+Notice that downloading and installing the different images might take some time. Also, waiting a couple of seconds before executing any operations.
 
 
 ## Initializing the Cassandra database
@@ -34,4 +35,5 @@ Some optional parameters can be added to this line of code. However, it is recom
 * *--port*: The server-side port to open connections to. Default to 9042.
 * *--username*: Username required to connect to Cassandra database. Default is 'cassandra'.
 * *--password*: Password required to connect to Cassandra database. Default is 'cassandra'.
+
 
