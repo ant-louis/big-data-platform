@@ -10,8 +10,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--topic_name', type=str, default='test_topic',
-                        help='Name of the topic. Default is test_topic.')
+    parser.add_argument('--topic_name', type=str, default='user1',
+                        help='Name of the topic. Default is user1.')
     parser.add_argument('--input_file', type=str, default='../../data/subdatasets/subdataset_0.csv',
                         help='Path to the csv data file. Default is ../../data/subdatasets/subdataset_0.csv')
     args = parser.parse_args()
@@ -24,7 +24,7 @@ def run(args):
     """
     # Create producer that connects to Kafka server running in Docker.
     producer = KafkaProducer(
-        bootstrap_servers='localhost:9093', 
+        bootstrap_servers='localhost:9094', 
         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     # Send data line by line

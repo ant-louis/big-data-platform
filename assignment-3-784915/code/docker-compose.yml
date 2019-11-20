@@ -8,7 +8,7 @@ services:
     container_name: cassandra
     image: cassandra:3.11
     volumes:
-      - ./../mysimbdp-coredms/db:/var/lib/cassandra/data/mysimbdp_coredms
+      - ./mysimbdp-coredms/db:/var/lib/cassandra/data/mysimbdp_coredms
     ports:
       - "9042:9042"
     environment:
@@ -34,19 +34,19 @@ services:
   kafka:
     container_name: kafka
     image: wurstmeister/kafka:2.12-2.3.0
+    ports:
+      - 9094:9094
     depends_on:
       - zookeeper
-    ports:
-      - "9093:9093"
-    expose:
-      - "9092"
     environment:
-      KAFKA_CREATE_TOPICS: "test_topic:2:1"  # Create a test topic with 2 partitions and 1 replica.
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CREATE_TOPICS: user1:1:1,user2:1:1 # Create two topics (one per user) with 1 parition and 1 replicas.
+
+
 
 #-------------------------------------------------------------------------------
 # Apache Spark
@@ -59,13 +59,16 @@ services:
       - "8080:8080"
       - "7077:7077"
     volumes:
-       - ./../mysimbdp-analytics/apps:/opt/spark-apps
-       - ./../mysimbdp-analytics/data:/opt/spark-data
+       - ./mysimbdp-analytics/spark-apps:/opt/spark-apps
+       - ./mysimbdp-analytics/spark-data:/opt/spark-data
     environment:
       - "SPARK_LOCAL_IP=spark-master"
+    networks:
+      - spark-network
   
   spark-worker:
     image: spark-worker:latest
+    hostname: spark-worker
     depends_on:
       - spark-master
       - kafka
@@ -77,5 +80,10 @@ services:
       - SPARK_DRIVER_MEMORY=128m
       - SPARK_EXECUTOR_MEMORY=256m
     volumes:
-       - ./../mysimbdp-analytics/apps:/opt/spark-apps
-       - ./../mysimbdp-analytics/data:/opt/spark-data
+       - ./mysimbdp-analytics/spark-apps:/opt/spark-apps
+       - ./mysimbdp-analytics/spark-data:/opt/spark-data
+    networks:
+      - spark-network #docker-spark_spark-network
+
+networks:
+  spark-network:

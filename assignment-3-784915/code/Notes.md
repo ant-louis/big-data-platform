@@ -1,25 +1,23 @@
-To run app:
+To submit a job:
 ````
-/spark/bin/spark-submit --master spark://spark-master:7077 --class \
-    org.apache.spark.examples.SparkPi \
-    /spark/examples/jars/spark-examples_2.11-2.4.0.jar 1000
+#/spark/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.4.4 --master spark://spark-master:7077 /opt/spark-apps/customerstreamapp1.py
 ````
 
-# Start spark job
-```
-spark-submit --class org.sevenmob.spark.streaming.DirectKafkaProcessing \
-     --master local[*] target/scala-2.10/TwitterProcessingPipeLine-assembly-0.1.jar \
-     $KAFKA_ENV_KAFKA_ADVERTISED_HOST_NAME:$KAFKA_PORT_9092_TCP_PORT \
-     $KAFKA_TOPIC_NAME \
-     $CASSANDRA_PORT_9042_TCP_ADDR \
-     $GOOGLE_GEOCODING_API_KEY
-```
-
-
-
 ````
-./bin/spark-submit \
-  --master spark://207.184.161.138:7077 \
-  examples/src/main/python/pi.py \
-  1000
-```
+bin/spark-submit — packages org.apache.spark:spark-streaming-kafka-0–8_2.11:2.0.0 spark-direct-kafka.py localhost:9092 new_topic
+````
+
+
+
+Pour Spark, je fais [Direct Approach](http://spark.apache.org/docs/latest/streaming-kafka-0-8-integration.html) -> noter les avantages dans le rapport notamment au niveau du parallélisme (c'est une question dans le rapport).
+
+For Python applications which lack SBT/Maven project management, spark-streaming-kafka-0-8_2.12 and its dependencies can be directly added to spark-submit using --packages. That is,
+````
+ ./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.12:2.4.4 ...
+ ````
+
+
+
+ ````
+kafka-topics.sh --list --bootstrap-server kafka:9092
+````

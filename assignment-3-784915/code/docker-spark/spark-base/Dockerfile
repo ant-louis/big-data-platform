@@ -2,14 +2,14 @@
 FROM openjdk:8u212-b04-jdk-stretch
 
 ENV DAEMON_RUN=true
-ENV SPARK_VERSION=2.3.4
+ENV SPARK_VERSION=2.4.4
 ENV HADOOP_VERSION=2.7
 ENV SCALA_VERSION=2.12.4
 ENV SCALA_HOME=/usr/share/scala
 ENV SPARK_HOME=/spark
 
 # Install needed utilities
-RUN apt-get update && apt-get install -y curl vim wget software-properties-common ssh net-tools ca-certificates jq bash
+RUN apt-get update && apt-get install -y curl vim wget software-properties-common ssh net-tools ca-certificates jq bash 
 
 # Download Scala
 RUN cd "/tmp" && \
