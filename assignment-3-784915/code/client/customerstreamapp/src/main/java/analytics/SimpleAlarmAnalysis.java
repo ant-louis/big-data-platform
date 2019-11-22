@@ -1,8 +1,8 @@
 /*
 * CS-E4640
 * Linh Truong
+* Edited by Antoine Louis
 */
-
 package analytics;
 
 import java.io.StringReader;
@@ -33,40 +33,56 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+
+
 public class SimpleAlarmAnalysis {
 
-	public static void main(String[] args) throws Exception {
-		//using flink ParameterTool to parse input parameters
-		final String input_rabbitMQ;
-		final String inputQueue;
-		final String outputQueue;
-		final int parallelismDegree;
-		try {
-				 final ParameterTool params = ParameterTool.fromArgs(args);
-				 input_rabbitMQ= params.get("amqpurl");
-				 inputQueue = params.get("iqueue");
-				 outputQueue =params.get("oqueue") ;
-				 parallelismDegree =params.getInt("parallelism");
-		} catch (Exception e) {
-				 System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --parallelism <degree of parallelism>'");
-					return;
-		}
+	// Variables
+	private static String input_rabbitMQ;
+	private static String inputQueue;
+	private static String outputQueue;
+	private static int parallelismDegree;
 
-		// the following is for setting up the execution getExecutionEnvironment
+
+	private static void parse_input_parameters(String[] args){
+		// Use Flink ParameterTool to parse input parameters
+		try {
+			final ParameterTool params = ParameterTool.fromArgs(args);
+			input_rabbitMQ = params.get("amqpurl");
+			inputQueue = params.get("iqueue");
+			outputQueue = params.get("oqueue") ;
+			parallelismDegree = params.getInt("parallelism");
+		} catch (Exception e) {
+			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --parallelism <degree of parallelism>'");
+		}
+	}
+
+
+	private static StreamExecutionEnvironment setup_environment(){
+		// Set up the execution getExecutionEnvironment
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		//checkpoint can be used for  different levels of message guarantees
-		// select one of the following modes
-		final CheckpointingMode checkpointingMode = CheckpointingMode.EXACTLY_ONCE ;
-		//final checkpointMode = CheckpointingMode.AT_LEAST_ONCE;
-		env.enableCheckpointing(1000*60, checkpointingMode);
-		// define the event time
-		env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-		//env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-		//if using EventTime, then we need to assignTimestampsAndWatermarks
-		//now start with the source of data
+		// Use checkpoint to select level of message guarantees. Here: EXACTLY_ONCE
+		final CheckpointingMode checkpointMode = CheckpointingMode.EXACTLY_ONCE;
+		env.enableCheckpointing(1000*60, checkpointMode);
 
-		final RMQConnectionConfig connectionConfig = new 	RMQConnectionConfig.Builder()
+		// Define the event time (ProcessingTime or EventTime). NB: if using EventTime, then we need to assignTimestampsAndWatermarks
+		env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+
+		return  env;
+	}
+
+
+	public static void main(String[] args) throws Exception {
+
+		// Parse input parameters
+		parse_input_parameters(args);
+
+		// Set up the environment
+		final StreamExecutionEnvironment env = setup_environment();
+
+		// Connect data source with RabbitMQ
+		final RMQConnectionConfig connectionConfig = new RMQConnectionConfig.Builder()
     			.setHost(input_rabbitMQ)
 				.setVirtualHost("/")
 				.setUserName("guest")
@@ -74,11 +90,11 @@ public class SimpleAlarmAnalysis {
 				.setPort(5672)
     			.build();
 
-		//build schema for the input DataStream
-		//simple text schema
-		SimpleStringSchema inputSchema =new SimpleStringSchema();
-		//declare rabbit mq as a source of data and set parallelism degree
-		RMQSource<String> btsdatasource= new RMQSource(
+		// Build schema for the input DataStream
+		SimpleStringSchema inputSchema = new SimpleStringSchema();
+
+		// Declare RabbitMQ as a source of data and set parallelism degree
+		RMQSource<String> btsdatasource = new RMQSource(
 				connectionConfig,            // config for the RabbitMQ connection
 				inputQueue,                 // name of the RabbitMQ queue to consume
 				false,       // no correlation between event
@@ -86,90 +102,23 @@ public class SimpleAlarmAnalysis {
 		final DataStream<String> btsdatastream = env
     			.addSource(btsdatasource)   // deserialization schema for input
     			.setParallelism(parallelismDegree);
-		//we will read data from RabbitMQ
-		// parse the data, determine alert and return the alert in a json string
-		DataStream<String> alerts = btsdatastream
-		        .flatMap(new BTSParser()
-				 /*
-					 Another example is to have:
-					 new FlatMapFunction<String, BTSAlarmEvent>() {
-		                 @Override
-		                 public void flatMap(String valueString, Collector<BTSAlarmEvent> out) {
-								 String[] record = valueString.split(",");
-						         ....
-					         out.collect(...);
-		                  	}
-		         })
-				*/
-				 )
-				 .keyBy(new AlarmKeySelector()
-					 /* another way is to have:
-					 new KeySelector<BTSAlarmEvent, String>() {
-     				   public String getKey(BTSAlarmEvent btsalarm) { return btsalarm.station_id; }
-   					}
-				*/
-				)
-		         .window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
-		         .process(new MyProcessWindowFunction());
 
-				 //send the alerts to another channel
-		RMQSink<String> sink =new RMQSink<String>(
+		//Read data from RabbitMQ, parse the data, determine alert and return the alert in a json string
+		DataStream<String> alerts = btsdatastream
+			.flatMap(new BTSParser())
+			.keyBy(new AlarmKeySelector())
+			.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
+			.process(new MyProcessWindowFunction());
+
+		// Send the alerts to output channel
+		RMQSink<String> sink = new RMQSink<String>(
 				connectionConfig,
 				outputQueue,
 				new SimpleStringSchema());
-
 		alerts.addSink(sink);
-		//use 1 thread to print out the result
-		alerts.print().setParallelism(1);
 
+		// Use 1 thread to print out the result
+		alerts.print().setParallelism(1);
 		env.execute("Simple CS-E4640 BTS Flink Application");
 	}
-	//this is used to return the key of the events so that we have KeyedStream from the datasource.
-	public static class AlarmKeySelector implements KeySelector<BTSAlarmEvent, String> {
-
-			@Override
-			public String getKey(BTSAlarmEvent value) throws Exception {
-					return value.station_id;
-			}
-	}
-
-	//we write a simple way to parsing the text as csv record.
-	//You can do it more simple by parsing the text with ","
-	public static class BTSParser implements FlatMapFunction<String, BTSAlarmEvent> {
-
-			@Override
-			public void flatMap(String line, Collector<BTSAlarmEvent> out) throws Exception {
-					CSVRecord record = CSVFormat.RFC4180.withIgnoreHeaderCase().parse(new StringReader(line)).getRecords().get(0);
-					//just for debug
-					//System.out.println("Input: " + line);
-					//filter all records with isActive =false
-					if (Boolean.valueOf(record.get(6))) {
-						SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-						Date date = format.parse(record.get(3));
-						BTSAlarmEvent alarm = new BTSAlarmEvent(record.get(0), record.get(1), record.get(2), date, Float.valueOf(record.get(4)), Float.valueOf(record.get(5)));
-						out.collect(alarm);
-					}
-			}
-	}
-	//a simple function to detect a sequence of alarms in a round
-	private static class MyProcessWindowFunction
-    extends ProcessWindowFunction<BTSAlarmEvent, String, String, TimeWindow> {
-		@Override
-  		public void process(String station_id,
-                    Context context,
-                    Iterable<BTSAlarmEvent> records,
-                    Collector<String> out) {
-					//we define a simple analytics is that in a windows if an alarm happens N times (true) then we should send an alert.
-					int number_active_threshold = 5; //for study purpose
-					int count = 0;
-					for (BTSAlarmEvent btsrecord: records) {
-						count++;
-					}
-					if (count > number_active_threshold) {
-						System.out.println("Just log that we have  a case");
-						out.collect (new BTSAlarmAlert(station_id,true).toJSON());
-					}
-		}
-	}
-
 }

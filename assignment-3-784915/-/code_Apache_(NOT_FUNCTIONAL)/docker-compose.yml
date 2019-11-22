@@ -1,0 +1,89 @@
+version: "3.0"
+
+services:
+  #-------------------------------------------------------------------------------
+  # Cassandra database
+  #-------------------------------------------------------------------------------
+  cassandra:
+    container_name: cassandra
+    image: cassandra:3.11
+    volumes:
+      - ./mysimbdp-coredms/db:/var/lib/cassandra/data/mysimbdp_coredms
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_START_RPC=true
+      - CASSANDRA_CLUSTER_NAME=mysimbdp-coredms-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=datacenter1
+
+  #-------------------------------------------------------------------------------
+  # Zookeeper
+  #-------------------------------------------------------------------------------
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper:3.4.6
+    ports:
+      - "2181:2181"
+
+  #-------------------------------------------------------------------------------
+  # Kafka Message broker
+  #-------------------------------------------------------------------------------
+  # This Kafka container is available in kafka:9092 if consumer/producer is also in
+  # a docker container, or localhost:9093 if your application is running locally.
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka:2.12-2.3.0
+    ports:
+      - 9094:9094
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CREATE_TOPICS: user1:1:1,user2:1:1 # Create two topics (one per user) with 1 parition and 1 replicas.
+
+
+
+#-------------------------------------------------------------------------------
+# Apache Spark
+#-------------------------------------------------------------------------------
+  spark-master:
+    image: spark-master:latest
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+       - ./mysimbdp-analytics/spark-apps:/opt/spark-apps
+       - ./mysimbdp-analytics/spark-data:/opt/spark-data
+    environment:
+      - "SPARK_LOCAL_IP=spark-master"
+    networks:
+      - spark-network
+  
+  spark-worker:
+    image: spark-worker:latest
+    hostname: spark-worker
+    depends_on:
+      - spark-master
+      - kafka
+      - cassandra
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=128m
+      - SPARK_EXECUTOR_MEMORY=256m
+    volumes:
+       - ./mysimbdp-analytics/spark-apps:/opt/spark-apps
+       - ./mysimbdp-analytics/spark-data:/opt/spark-data
+    networks:
+      - spark-network #docker-spark_spark-network
+
+networks:
+  spark-network:

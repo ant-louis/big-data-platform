@@ -19,8 +19,6 @@ def callback(ch, method, properties, body):
     """
     """
     print ("Received:", body, sep=" ")
-    time.sleep(1) # simulates some processing work
-    print(" Done")
     ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
 
 

@@ -33,7 +33,12 @@ In order to simulate the production of data that is sent to the message broker, 
 python producer.py
 ```
 
-
+### 3. Starting the streaming analytics
+In order to start the streaming analytics, run the following commands in the *code/clients/* repository:
+```bash
+chmod +x ./my-app.sh
+./my-app.sh
+```
 
 
 ### (Optional) Initializing the Cassandra database
@@ -47,14 +52,4 @@ Some optional parameters can be added to this line of code. However, it is recom
 * *--username*: Username required to connect to Cassandra database. Default is 'cassandra'.
 * *--password*: Password required to connect to Cassandra database. Default is 'cassandra'.
 
-
-
-
-
-## 
-````
-mvn install
-docker cp target/mysimbdp-0.1-SNAPSHOT.jar flink-jobmanager:/job_user1.jar
-docker exec -ti flink-jobmanager flink run /job_user1.jar --amqpurl rabbit  --iqueue in1 --oqueue out1 --parallelism 1
-````
 
