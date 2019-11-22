@@ -9,8 +9,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--queue_name', type=str, default='client1',
-                        help='Name of the queue. Default is client1.')                  
+    parser.add_argument('--queue_name', type=str, default='out_1',
+                        help='Name of the queue. Default is out_1.')                  
     args = parser.parse_args()
     return args
 
@@ -21,7 +21,7 @@ def callback(ch, method, properties, body):
     print ("Received:", body, sep=" ")
     time.sleep(1) # simulates some processing work
     print(" Done")
-    ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
+    #ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
 
 
 def run(args):
@@ -32,7 +32,7 @@ def run(args):
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         channel = connection.channel()
-        channel.queue_declare(queue=args.queue_name, durable=True)  # mark both the queue and messages as durable to make sure that messages aren't lost.
+        channel.queue_declare(queue=args.queue_name)
     except Exception as e:
         print("Connection to {} failed! Error: {}".format(args.queue_name, e))
     print("Connected !")
@@ -42,7 +42,7 @@ def run(args):
 
     # Consume messages
     print('Waiting for messages. To exit press CTRL+C')
-    channel.basic_consume(queue=args.queue_name, on_message_callback=callback)
+    channel.basic_consume(queue=args.queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
     # Close connection
