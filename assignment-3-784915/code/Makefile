@@ -1,7 +1,8 @@
-install:
-	docker build -t spark-base:latest ./docker-spark/spark-base
-	docker build -t spark-master:latest ./docker-spark/spark-master
-	docker build -t spark-worker:latest ./docker-spark/spark-worker
-	docker build -t spark-submit:latest ./docker-spark/spark-submit
+## Installs a development environment
+install: deploy
+
+## Composes project using docker-compose
+deploy:
+	docker-compose -f docker-compose.yml build
 	docker-compose -f docker-compose.yml down -v
-	docker-compose -f docker-compose.yml up -d --scale spark-worker=2 --force-recreate
+	docker-compose -f docker-compose.yml up -d --force-recreate
