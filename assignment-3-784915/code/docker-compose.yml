@@ -7,8 +7,8 @@ services:
   cassandra:
     container_name: cassandra
     image: cassandra:3.11
-    volumes:
-      - ./mysimbdp-coredms/db:/var/lib/cassandra/data/mysimbdp_coredms
+    # volumes:
+    #   - ./mysimbdp-coredms/db:/var/lib/cassandra/data/mysimbdp_coredms
     ports:
       - "9042:9042"
     environment:
@@ -28,8 +28,8 @@ services:
     ports:
         - 5672:5672  #default port for message broker
         - 15672:15672  #default port for RabbitMQ GUI
-    volumes:
-        - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
+    # volumes:
+    #     - ./mysimbdp-databroker/rabbitmq:/var/lib/rabbitmq
     environment:
         RABBITMQ_DEFAULT_USER: guest
         RABBITMQ_DEFAULT_PASS: guest

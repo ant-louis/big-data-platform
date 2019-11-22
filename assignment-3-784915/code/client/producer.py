@@ -43,9 +43,9 @@ def run(args):
         channel.basic_publish(exchange='',
                                 routing_key=args.queue_name,
                                 body=line,
-                                # properties=pika.BasicProperties(
-                                #     delivery_mode = 2, # make message persistent
-                            )
+                                properties=pika.BasicProperties(
+                                    delivery_mode = 2, # make message persistent
+                            ))
         time.sleep(1)
 
     # Close connection
