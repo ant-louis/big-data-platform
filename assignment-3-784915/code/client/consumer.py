@@ -9,8 +9,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--queue_name', type=str, default='out_1',
-                        help='Name of the queue. Default is out_1.')                  
+    parser.add_argument('--queue_name', type=str, default='out1',
+                        help='Name of the queue. Default is out1.')                  
     args = parser.parse_args()
     return args
 

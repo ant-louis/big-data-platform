@@ -9,8 +9,8 @@ def parse_arguments():
     :return: the different arguments of the command line.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--queue_name', type=str, default='in_1',
-                        help='Name of the queue. Default is in_1.')
+    parser.add_argument('--queue_name', type=str, default='in1',
+                        help='Name of the queue. Default is in1.')
     parser.add_argument('--input_file', type=str, default='../../data/subdatasets/subdataset_0.csv',
                         help='Path to the csv data file. Default is ../../data/subdatasets/subdataset_0.csv')
     parser.add_argument('--skip_header', type=bool, default=True,

@@ -5,7 +5,6 @@
   <artifactId>mysimbdp</artifactId>
   <name>Flink Mysimbdp Job</name>
   <version>0.1-SNAPSHOT</version>
-
   <build>
     <pluginManagement>
       <plugins>
@@ -88,7 +87,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>myapp.SimpleAlarmAnalysis</mainClass>
+                  <mainClass>analytics.SimpleAlarmAnalysis</mainClass>
                 </transformer>
               </transformers>
             </configuration>

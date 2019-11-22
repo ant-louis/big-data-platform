@@ -3,7 +3,7 @@
 * Linh Truong
 */
 
-package fi.aalto.cs.cse4640;
+package analytics;
 
 import java.io.StringReader;
 import java.util.Date;

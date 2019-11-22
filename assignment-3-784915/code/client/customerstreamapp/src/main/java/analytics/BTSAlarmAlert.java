@@ -2,7 +2,7 @@
  * CS-E4640
  * Linh Truong
  */
-package fi.aalto.cs.cse4640;
+package analytics;
 public class BTSAlarmAlert {
     public boolean warning = false;
     public String station_id;
