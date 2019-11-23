@@ -10,7 +10,7 @@ This project is based on Docker containers, so ensure to have [Docker](https://d
 - [argparse](https://pypi.org/project/argparse/)
 - [matplotlib](https://pypi.org/project/matplotlib/)
 - [tqdm](https://pypi.org/project/tqdm/)
-- [kafka-python](https://pypi.org/project/kafka-python/)
+- [pika](https://pypi.org/project/pika/)
 
 These libraries can be installed automatically by running the following command in the *code/* repository:
 ```bash
@@ -32,7 +32,20 @@ In order to simulate the production of data that is sent to the message broker, 
 ```bash
 python producer.py
 ```
+Some optional parameters can be added to this line of code:
+* *--queue_name*: Name of the queue. Default is in1.
+* *--input_file*: Path to the csv data file. Default is '../../data/bts-data-alarm-2017.csv'
+* *--skip_header*: Boolean telling to skip the first line of the csv file. Default is True.
 
+
+
+### 3. Consuming data from the Message Broker
+In order to simulate the production of data that is sent to the message broker, run the following command in the *code/clients/* repository:
+```bash
+python consumer.py
+```
+Some optional parameters can be added to this line of code:
+* *--queue_name*: Name of the queue. Default is out1.
 
 
 
