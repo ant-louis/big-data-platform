@@ -11,10 +11,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--queue_name', type=str, default='in1',
                         help='Name of the queue. Default is in1.')
-    parser.add_argument('--input_file', type=str, default='../../data/subdatasets/subdataset_0.csv',
-                        help='Path to the csv data file. Default is ../../data/subdatasets/subdataset_0.csv')
-    parser.add_argument('--skip_header', type=bool, default=True,
-                    help='Boolean telling to skip the first line of the csv file. Default is True.')
+    parser.add_argument('--input_file', type=str, default='../../data/bts-data-alarm-2017.csv',
+                        help='Path to the csv data file. Default is ../../data/bts-data-alarm-2017.csv')
     args = parser.parse_args()
     return args
 
@@ -36,7 +34,7 @@ def run(args):
     # Send data line by line
     print("Sending data from {}...".format(args.input_file))
     f = open(args.input_file, 'r')
-    f.readline()
+    f.readline()  # Consume header
     for line in f:
         print ("Send a line")
         print ("-----------------------")
@@ -52,14 +50,6 @@ def run(args):
     print("Closing connection to the channel {}...".format(args.queue_name))
     connection.close()
 
-
-# def delete(args):
-#     """
-#     """
-#     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-#     channel = connection.channel()
-#     channel.queue_delete(queue=args.queue_name)
-#     connection.close()
 
 
 if __name__ == "__main__":

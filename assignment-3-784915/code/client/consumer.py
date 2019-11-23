@@ -19,7 +19,7 @@ def callback(ch, method, properties, body):
     """
     """
     print ("Received:", body, sep=" ")
-    ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
+    #ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
 
 
 def run(args):
@@ -36,11 +36,11 @@ def run(args):
     print("Connected !")
 
     # Don't give more than one message to a worker at a time.
-    channel.basic_qos(prefetch_count=1)
+    #channel.basic_qos(prefetch_count=1)
 
     # Consume messages
     print('Waiting for messages. To exit press CTRL+C')
-    channel.basic_consume(queue=args.queue_name, on_message_callback=callback)
+    channel.basic_consume(queue=args.queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
     # Close connection

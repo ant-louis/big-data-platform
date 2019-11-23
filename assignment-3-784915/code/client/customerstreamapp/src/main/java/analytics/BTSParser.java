@@ -26,19 +26,16 @@ public class BTSParser implements FlatMapFunction<String, BTSAlarmEvent> {
         Float valueThreshold = Float.valueOf(record.get(5));
         Boolean isActive = Boolean.valueOf(record.get(6));
 
-        // Just for debug
-        //System.out.println("Input: " + line);
+        // Create new Alarm Event
+        BTSAlarmEvent alarm = new BTSAlarmEvent(
+                station_id,
+                datapoint_id,
+                alarm_id,
+                event_time,
+                value,
+                valueThreshold,
+                isActive);
+        out.collect(alarm);
 
-        // Filter all records with isActive=false
-        if (isActive) {
-            BTSAlarmEvent alarm = new BTSAlarmEvent(
-                    station_id,
-                    datapoint_id,
-                    alarm_id,
-                    event_time,
-                    value,
-                    valueThreshold);
-            out.collect(alarm);
-        }
     }
 }

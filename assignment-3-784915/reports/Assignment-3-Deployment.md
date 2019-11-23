@@ -35,7 +35,6 @@ python producer.py
 Some optional parameters can be added to this line of code:
 * *--queue_name*: Name of the queue. Default is in1.
 * *--input_file*: Path to the csv data file. Default is '../../data/bts-data-alarm-2017.csv'
-* *--skip_header*: Boolean telling to skip the first line of the csv file. Default is True.
 
 
 
