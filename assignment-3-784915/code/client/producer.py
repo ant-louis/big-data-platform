@@ -11,8 +11,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--queue_name', type=str, default='in1',
                         help='Name of the queue. Default is in1.')
-    parser.add_argument('--input_file', type=str, default='../../data/bts-data-alarm-2017.csv',
-                        help='Path to the csv data file. Default is ../../data/bts-data-alarm-2017.csv')
+    parser.add_argument('--input_file', type=str, default='../../data/subdatasets/subdataset_12.csv',
+                        help='Path to the csv data file. Default is ../../data/subdatasets/subdataset_12.csv')
     args = parser.parse_args()
     return args
 

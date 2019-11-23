@@ -16,7 +16,6 @@ public class MyProcessWindowFunction extends ProcessWindowFunction<BTSAlarmEvent
             count++;
         }
         if (count > number_active_threshold) {
-            System.out.println("Just log that we have  a case");
             out.collect (new BTSAlarmAlert(station_id,true).toJSON());
         }
     }

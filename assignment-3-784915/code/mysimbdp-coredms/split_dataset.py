@@ -6,9 +6,10 @@ def sort_csv(filename):
     """
     """
     df = pd.read_csv(filename, header=0, sep=',')
-    df['event_time'] = pd.to_datetime(df['event_time'])
-    df.sort_values(by=['event_time'], inplace=True, ascending=True)
-    df.to_csv('../../data/sorted_bts-data-alarm-2017.csv', sep=',', encoding='utf-8', float_format='%.2f', decimal='.', index=False)
+    df['datetime'] = pd.to_datetime(df['event_time'])
+    df.sort_values(by=['datetime'], inplace=True, ascending=True)
+    df.drop(columns=['datetime'], inplace=True)
+    df.to_csv('../../data/sorted_bts-data-alarm-2017.csv', index=False)
 
 
 
