@@ -27,12 +27,9 @@ def run(args):
     """
     # Connect to the channel
     print("Connecting to the channel {}...".format(args.queue_name))
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-        channel = connection.channel()
-        channel.queue_declare(queue=args.queue_name, durable=False)
-    except Exception as e:
-        print("Connection to {} failed! Error: {}".format(args.queue_name, e))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue=args.queue_name, durable=False)  # mark both the queue and messages as durable to make sure that messages aren't lost.
     print("Connected !")
 
     # Don't give more than one message to a worker at a time.
