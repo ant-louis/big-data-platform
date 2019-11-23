@@ -1,7 +1,7 @@
 analytics/MyProcessWindowFunction.class
+analytics/BTSEvent.class
 analytics/AlarmKeySelector.class
 analytics/BTSParser.class
 analytics/BTSAlarmAlert.class
-analytics/BTSAlarmEvent.class
 analytics/NewFunction.class
 analytics/SimpleAlarmAnalysis.class

@@ -10,9 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class BTSParser implements FlatMapFunction<String, BTSAlarmEvent> {
+public class BTSParser implements FlatMapFunction<String, BTSEvent> {
     @Override
-    public void flatMap(String line, Collector<BTSAlarmEvent> out) throws Exception {
+    public void flatMap(String line, Collector<BTSEvent> out) throws Exception {
             CSVRecord record = CSVFormat.RFC4180.withIgnoreHeaderCase().parse(new StringReader(line)).getRecords().get(0);
 
             // Get elements of record
@@ -25,10 +25,8 @@ public class BTSParser implements FlatMapFunction<String, BTSAlarmEvent> {
             Float valueThreshold = Float.valueOf(record.get(5));
             Boolean isActive = Boolean.valueOf(record.get(6));
 
-            //filter all records with isActive =false
-            if (isActive) {
-                BTSAlarmEvent alarm = new BTSAlarmEvent(station_id, datapoint_id, alarm_id, event_time, value, valueThreshold);
-                out.collect(alarm);
-            }
+            // Create the event
+            BTSEvent alarm = new BTSEvent(station_id, datapoint_id, alarm_id, event_time, value, valueThreshold, isActive);
+            out.collect(alarm);
     }
 }
