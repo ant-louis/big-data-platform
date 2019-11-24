@@ -18,28 +18,42 @@ pip install -r requirements.txt
 ```
 
 ## Deployment
-
-###  1. Launching the Docker containers
+###  1. Launch the Docker containers
 In order to run the containers, run the following command in the *code/* repository:
 ```bash
 make install
 ```
-Notice that downloading and installing the different images might take some time. Also, waiting a couple of seconds before executing any operations.
+Notice that downloading and installing the different images might take some time. Also, wait a couple of seconds before executing any operations. After running the command, four containers should be running:
+* *rabbit*: the RabbitMQ Message Broker;
+* *cassandra*: the Cassandra database;
+* *flink-jobmanager*: the Job Manager for the Flink analytics;
+* *flink-taskmanager*: one Task Manager for the Flink analytics;
+
+Note that UI are available for Flink and RabbitMQ in your web browser at *'localhost:8081'* and *'localhost:15672'* respectively. See more details on the ports and access in the *docker-compose.yml* file. 
 
 
-### 2. Sending data to the Message Broker
+### 2. Start the streaming analytics
+In order to start the streaming analytics job of our demo customer, run the following commands in the *code/client/customerstreamapp/* repository:
+```bash
+chmod +x start-analytics.sh
+./start-analytics.sh
+```
+This will first copy the *.jar* file of the customerstreamapp to the Flink Job Manager, and then run it by creating two queues for the customer: the input queue of the stream *'in1* and the output queue *'out1'*. Once the job is launched, Flink will listen at *'in1* for incoming records to process. After the processing, it will send its analytics to *'out1* which can later be consumed by the customer.
+
+
+### 3. Sending data to the Message Broker
 In order to simulate the production of data that is sent to the message broker, run the following command in the *code/clients/* repository:
 ```bash
 python producer.py
 ```
 Some optional parameters can be added to this line of code:
 * *--queue_name*: Name of the queue. Default is in1.
-* *--input_file*: Path to the csv data file. Default is '../../data/bts-data-alarm-2017.csv'
+* *--input_file*: Path to the csv data file. Default is '../../data/subdatasets/subdataset_12.csv'. It's a subdataset of about 10000 lines from the original *'bts-data-alarm-2017.csv* (which has been sorted by timestamp), where some bad lines (bad format) have intentionally been added to test the deserialization of such formats.
 
 
 
-### 3. Consuming data from the Message Broker
-In order to simulate the production of data that is sent to the message broker, run the following command in the *code/clients/* repository:
+### 4. Consuming data from the Message Broker
+In order to consume the analytical messages computed with the customerstreamapp that queued in the output channel of the customer, run the following command in the *code/clients/* repository:
 ```bash
 python consumer.py
 ```
@@ -58,15 +72,3 @@ Some optional parameters can be added to this line of code. However, it is recom
 * *--port*: The server-side port to open connections to. Default to 9042.
 * *--username*: Username required to connect to Cassandra database. Default is 'cassandra'.
 * *--password*: Password required to connect to Cassandra database. Default is 'cassandra'.
-
-
-
-
-
-## 
-````
-mvn install
-docker cp target/mysimbdp-0.1-SNAPSHOT.jar flink-jobmanager:/job_user1.jar
-docker exec -ti flink-jobmanager flink run /job_user1.jar --amqpurl rabbit  --iqueue in1 --oqueue out1 --parallelism 1
-````
-
