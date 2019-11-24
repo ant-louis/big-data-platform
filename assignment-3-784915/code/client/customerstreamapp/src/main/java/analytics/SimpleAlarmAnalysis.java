@@ -50,35 +50,6 @@ public class SimpleAlarmAnalysis {
 	private static int parallelismDegree;
 
 
-	private static void parse_input_parameters(String[] args){
-		// Use Flink ParameterTool to parse input parameters
-		try {
-			final ParameterTool params = ParameterTool.fromArgs(args);
-			input_rabbitMQ = params.get("amqpurl");
-			inputQueue = params.get("iqueue");
-			outputQueue = params.get("oqueue");
-			errorQueue = params.get("equeue");
-			parallelismDegree = params.getInt("parallelism");
-		} catch (Exception e) {
-			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --equeue <error queue> --parallelism <degree of parallelism>'");
-		}
-	}
-
-
-	private static StreamExecutionEnvironment setup_environment(){
-		// Set up the execution getExecutionEnvironment
-		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
-		// Use checkpoint to select level of message guarantees. Here: EXACTLY_ONCE
-		final CheckpointingMode checkpointMode = CheckpointingMode.EXACTLY_ONCE;
-		env.enableCheckpointing(1000*60, checkpointMode);
-
-		// Define the event time (ProcessingTime or EventTime). NB: if using EventTime, then we need to assignTimestampsAndWatermarks
-		env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-
-		return  env;
-	}
-
 
 	public static void main(String[] args) throws Exception {
 
@@ -109,21 +80,6 @@ public class SimpleAlarmAnalysis {
 		final DataStream<String> btsdatastream = env
     			.addSource(btsdatasource)   // deserialization schema for input
     			.setParallelism(parallelismDegree);
-
-
-
-		//Read data from RabbitMQ, parse the data, determine alert and return the alert in a json string
-		// DataStream<String> alerts = btsdatastream
-		// 	.flatMap(new BTSParser())
-		// 	.keyBy(new AlarmKeySelector())
-		// 	.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
-		// 	.process(new MyProcessWindowFunction());
-
-		// DataStream<String> alerts = btsdatastream
-		// 	.flatMap(new BTSParser())
-		// 	.keyBy(new StatisticsKeySelector())
-		// 	.process(new GlobalStatisticsFunction());
-
 
 		// Parse initial datastream
 		DataStream<BTSEvent> parsedDataStream = btsdatastream.flatMap(new BTSParser());
@@ -161,7 +117,7 @@ public class SimpleAlarmAnalysis {
 				connectionConfig,
 				outputQueue,
 				new SimpleStringSchema());
-		analyticsGlobalStream.addSink(analyticsSink);
+		//analyticsGlobalStream.addSink(analyticsSink);
 		analyticsWindowStream.addSink(analyticsSink);
 
 		// Send possible errors to the error queue
@@ -172,11 +128,42 @@ public class SimpleAlarmAnalysis {
 		errorDataStream.flatMap(new BTSToString()).addSink(errorSink);
 
 		// Print out the result
-		analyticsGlobalStream.print().setParallelism(1);
+		//analyticsGlobalStream.print().setParallelism(1);
 		analyticsWindowStream.print().setParallelism(1);
 		errorDataStream.print().setParallelism(1);
 
 		// Execute environment
 		env.execute("CustomerStreamApp");
 	}
+
+
+	private static void parse_input_parameters(String[] args){
+		// Use Flink ParameterTool to parse input parameters
+		try {
+			final ParameterTool params = ParameterTool.fromArgs(args);
+			input_rabbitMQ = params.get("amqpurl");
+			inputQueue = params.get("iqueue");
+			outputQueue = params.get("oqueue");
+			errorQueue = params.get("equeue");
+			parallelismDegree = params.getInt("parallelism");
+		} catch (Exception e) {
+			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --equeue <error queue> --parallelism <degree of parallelism>'");
+		}
+	}
+
+
+	private static StreamExecutionEnvironment setup_environment(){
+		// Set up the execution getExecutionEnvironment
+		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+		// Use checkpoint to select level of message guarantees. Here: EXACTLY_ONCE
+		final CheckpointingMode checkpointMode = CheckpointingMode.EXACTLY_ONCE;
+		env.enableCheckpointing(1000*60, checkpointMode);
+
+		// Define the event time (ProcessingTime or EventTime). NB: if using EventTime, then we need to assignTimestampsAndWatermarks
+		env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+
+		return  env;
+	}
+
 }

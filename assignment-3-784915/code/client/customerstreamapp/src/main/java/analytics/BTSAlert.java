@@ -21,8 +21,11 @@ public class BTSAlert {
     // Class constructors
     public BTSAlert() {}
 
-    public BTSAlert(String station_id) {
-      this.station_id = station_id;
+    public BTSAlert(String key) {
+        String[] splits = key.split("-");
+        this.station_id = splits[0];
+        this.datapoint_id = splits[1];
+        this.alarm_id = splits[2];
     }
 
     public BTSAlert(String station_id, String datapoint_id, String alarm_id, String counter, String active_counter, String min, String max, String mean) {
@@ -39,7 +42,7 @@ public class BTSAlert {
 
     // Methods
     public String alarmMessage() {
-        return "{\"BTSAlert\":{\"station_id\":"+station_id+", \"active\":true}}";
+        return "{\"Message Type\":\"Window Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Message\":\"Alarm often gets triggered!.\"}}";
     }
 
 
