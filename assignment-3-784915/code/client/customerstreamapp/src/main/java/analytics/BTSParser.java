@@ -26,7 +26,7 @@ public class BTSParser implements FlatMapFunction<String, BTSEvent> {
             Boolean isActive = Boolean.valueOf(record.get(6));
 
             // Create the event
-            BTSEvent alarm = new BTSEvent(station_id, datapoint_id, alarm_id, event_time, value, valueThreshold, isActive);
-            out.collect(alarm);
+            BTSEvent event = new BTSEvent(station_id, datapoint_id, alarm_id, event_time, value, valueThreshold, isActive);
+            out.collect(event);
     }
 }

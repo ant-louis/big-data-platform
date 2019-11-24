@@ -104,11 +104,16 @@ public class SimpleAlarmAnalysis {
     			.setParallelism(parallelismDegree);
 
 		//Read data from RabbitMQ, parse the data, determine alert and return the alert in a json string
+		// DataStream<String> alerts = btsdatastream
+		// 	.flatMap(new BTSParser())
+		// 	.keyBy(new AlarmKeySelector())
+		// 	.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
+		// 	.process(new MyProcessWindowFunction());
+
 		DataStream<String> alerts = btsdatastream
 			.flatMap(new BTSParser())
-			.keyBy(new AlarmKeySelector())
-			.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
-			.process(new MyProcessWindowFunction());
+			.keyBy(new StatisticsKeySelector())
+			.process(new StatisticsFunction());
 
 		// Send the alerts to output channel
 		RMQSink<String> sink = new RMQSink<String>(
