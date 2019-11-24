@@ -15,13 +15,22 @@ public class MyProcessWindowFunction extends ProcessWindowFunction<BTSEvent, Str
         int number_active_threshold = 5; //for study purpose
         int count = 0;
 
+        // Split the key to get the different ids
+        String[] splits = key.split("-");
+        String station_id = splits[0];
+        String datapoint_id = splits[1];
+        String alarm_id = splits[2];
+
+        // Count
         for (BTSEvent btsrecord: records) {
             if (btsrecord.isActive) {
                 count++;
             }   
         }
+
+        // If exceed threshold, trigger alert
         if (count > number_active_threshold) {
-            out.collect (new BTSAlert(key).alarmMessage());
+            out.collect(new BTSAlert(station_id, datapoint_id, alarm_id).alarmMessage());
         }
     }
 }

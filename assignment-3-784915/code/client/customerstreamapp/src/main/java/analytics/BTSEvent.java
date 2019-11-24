@@ -23,6 +23,7 @@ public class BTSEvent {
 
     // Class constructors
     BTSEvent() {}
+    
     BTSEvent(String station_id, String datapoint_id, String alarm_id, Date event_time, Float value, Float valueThreshold, Boolean isActive) {
         this.station_id = station_id;
         this.datapoint_id = datapoint_id;
@@ -38,11 +39,5 @@ public class BTSEvent {
     BTSEvent(String error) throws Exception {
         this.isDeserialized = false;
         this.error = error;
-    }
-
-
-    // Methods
-    public String showError(){
-        return this.error;
     }
 }

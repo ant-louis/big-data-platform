@@ -8,6 +8,6 @@ public class BTSToString implements FlatMapFunction<BTSEvent, String> {
 
     @Override
     public void flatMap(BTSEvent error, Collector<String> out) {
-        out.collect(error.showError());
+        out.collect(new BTSAlert(error.error).errorMessage());
     };
 }

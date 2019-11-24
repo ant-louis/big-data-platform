@@ -46,7 +46,6 @@ public class SimpleAlarmAnalysis {
 	private static String input_rabbitMQ;
 	private static String inputQueue;
 	private static String outputQueue;
-	private static String errorQueue;
 	private static int parallelismDegree;
 
 
@@ -112,25 +111,18 @@ public class SimpleAlarmAnalysis {
                 .window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
                 .process(new MyProcessWindowFunction());
 
-		// Send analytics to the output queue
-		RMQSink<String> analyticsSink = new RMQSink<String>(
+		// Send analytics and errors to the output queue of the customer
+		RMQSink<String> sink = new RMQSink<String>(
 				connectionConfig,
 				outputQueue,
 				new SimpleStringSchema());
-		//analyticsGlobalStream.addSink(analyticsSink);
-		analyticsWindowStream.addSink(analyticsSink);
-
-		// Send possible errors to the error queue
-		RMQSink<String> errorSink = new RMQSink<String>(
-				connectionConfig,
-				errorQueue,
-				new SimpleStringSchema());
-		errorDataStream.flatMap(new BTSToString()).addSink(errorSink);
+		analyticsGlobalStream.addSink(sink);
+		analyticsWindowStream.addSink(sink);
+		errorDataStream.flatMap(new BTSToString()).addSink(sink);
 
 		// Print out the result
-		//analyticsGlobalStream.print().setParallelism(1);
+		analyticsGlobalStream.print().setParallelism(1);
 		analyticsWindowStream.print().setParallelism(1);
-		errorDataStream.print().setParallelism(1);
 
 		// Execute environment
 		env.execute("CustomerStreamApp");
@@ -144,10 +136,9 @@ public class SimpleAlarmAnalysis {
 			input_rabbitMQ = params.get("amqpurl");
 			inputQueue = params.get("iqueue");
 			outputQueue = params.get("oqueue");
-			errorQueue = params.get("equeue");
 			parallelismDegree = params.getInt("parallelism");
 		} catch (Exception e) {
-			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --equeue <error queue> --parallelism <degree of parallelism>'");
+			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --parallelism <degree of parallelism>'");
 		}
 	}
 

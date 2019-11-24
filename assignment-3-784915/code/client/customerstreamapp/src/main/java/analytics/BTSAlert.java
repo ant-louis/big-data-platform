@@ -16,16 +16,20 @@ public class BTSAlert {
     public String min;
     public String max;
     public String mean;
+    public String error;
 
 
     // Class constructors
     public BTSAlert() {}
 
-    public BTSAlert(String key) {
-        String[] splits = key.split("-");
-        this.station_id = splits[0];
-        this.datapoint_id = splits[1];
-        this.alarm_id = splits[2];
+    public BTSAlert(String error) {
+        this.error = error;
+    }
+
+    public BTSAlert(String station_id, String datapoint_id, String alarm_id) {
+        this.station_id = station_id;
+        this.datapoint_id = datapoint_id;
+        this.alarm_id = alarm_id;
     }
 
     public BTSAlert(String station_id, String datapoint_id, String alarm_id, String counter, String active_counter, String min, String max, String mean) {
@@ -48,6 +52,11 @@ public class BTSAlert {
 
     public String statMessage() {
         return "{\"Message Type\":\"Global Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Events counter\":"+counter+",\"Active alarms counter\":"+active_counter+",\"Minimum value\":"+min+",\"Maximum value\":"+max+",\"Mean value\":"+mean+"}}";
+    }
+
+
+    public String errorMessage() {
+        return "{\"Message Type\":\"Error\",\"Content\":{\"Message\":"+error+"}}";
     }
 
 }
