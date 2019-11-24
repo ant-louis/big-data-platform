@@ -183,3 +183,5 @@ The mysimbdp-coredms component has been designed as a Cassandra database. Apache
 
 
 ## Part 3 - Connection
+
+### 1. 
