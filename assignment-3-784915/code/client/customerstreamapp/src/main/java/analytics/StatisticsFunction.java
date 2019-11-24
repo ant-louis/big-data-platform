@@ -7,6 +7,7 @@ import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.api.common.typeinfo.TypeHint;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 
 
@@ -49,5 +50,6 @@ public class StatisticsFunction extends KeyedProcessFunction<String, BTSEvent, S
         sum = getRuntimeContext().getState(descriptor);
     }
 
-    
+
+
 }

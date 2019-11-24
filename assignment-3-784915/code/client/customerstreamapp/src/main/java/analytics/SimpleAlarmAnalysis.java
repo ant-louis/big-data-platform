@@ -110,10 +110,15 @@ public class SimpleAlarmAnalysis {
 		// 	.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
 		// 	.process(new MyProcessWindowFunction());
 
+		// DataStream<String> alerts = btsdatastream
+		// 	.flatMap(new BTSParser())
+		// 	.keyBy(new StatisticsKeySelector())
+		// 	.process(new StatisticsFunction());
+
 		DataStream<String> alerts = btsdatastream
 			.flatMap(new BTSParser())
 			.keyBy(new StatisticsKeySelector())
-			.process(new StatisticsFunction());
+			.process(new MyStatsFunction());
 
 		// Send the alerts to output channel
 		RMQSink<String> sink = new RMQSink<String>(
@@ -124,6 +129,6 @@ public class SimpleAlarmAnalysis {
 
 		// Use 1 thread to print out the result
 		alerts.print().setParallelism(1);
-		env.execute("Simple CS-E4640 BTS Flink Application");
+		env.execute("CustomerStreamApp");
 	}
 }
