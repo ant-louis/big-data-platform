@@ -9,6 +9,7 @@ import java.util.Date;
 
 
 public class BTSEvent {
+
     // Class variables
     public String station_id;
     public String datapoint_id;
@@ -17,6 +18,8 @@ public class BTSEvent {
     public float value;
     public float valueThreshold;
     public boolean isActive;
+    public boolean isDeserialized;
+    public String error;
 
     // Class constructors
     BTSEvent() {}
@@ -28,10 +31,18 @@ public class BTSEvent {
         this.value = value;
         this.valueThreshold = valueThreshold;
         this.isActive = isActive;
+        this.isDeserialized = true;
+        this.error = null;
     }
 
+    BTSEvent(String error) throws Exception {
+        this.isDeserialized = false;
+        this.error = error;
+    }
+
+
     // Methods
-    public String toString() {
-        return "station_id="+station_id + " for datapoint_id=" + datapoint_id + " at " + event_time.toString() + " alarm_id="+alarm_id+" with value ="+value+" and isActive="+isActive;
+    public String showError(){
+        return this.error;
     }
 }

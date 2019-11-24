@@ -1,9 +1,11 @@
 analytics/MyProcessWindowFunction.class
-analytics/MyStatsFunction.class
 analytics/BTSEvent.class
 analytics/Statistics.class
 analytics/StatisticsKeySelector.class
 analytics/AlarmKeySelector.class
 analytics/BTSParser.class
+analytics/BTSToString.class
+analytics/GlobalStatisticsFunction.class
+analytics/SimpleAlarmAnalysis$1.class
 analytics/SimpleAlarmAnalysis.class
 analytics/BTSAlert.class

@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction.OnTimerCont
 import org.apache.flink.util.Collector;
 
 
-public class MyStatsFunction extends KeyedProcessFunction<String, BTSEvent, String> {
+public class GlobalStatisticsFunction extends KeyedProcessFunction<String, BTSEvent, String> {
 
     private ValueState<Statistics> state;
 

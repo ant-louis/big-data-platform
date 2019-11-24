@@ -7,6 +7,8 @@ package analytics;
 
 import java.io.StringReader;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -18,6 +20,7 @@ import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig
 import org.apache.flink.streaming.connectors.rabbitmq.RMQSource;
 import org.apache.flink.streaming.connectors.rabbitmq.RMQSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.api.java.tuple.Tuple;
@@ -28,6 +31,8 @@ import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeW
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.streaming.api.datastream.SplitStream;
+import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.util.Collector;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -41,6 +46,7 @@ public class SimpleAlarmAnalysis {
 	private static String input_rabbitMQ;
 	private static String inputQueue;
 	private static String outputQueue;
+	private static String errorQueue;
 	private static int parallelismDegree;
 
 
@@ -50,10 +56,11 @@ public class SimpleAlarmAnalysis {
 			final ParameterTool params = ParameterTool.fromArgs(args);
 			input_rabbitMQ = params.get("amqpurl");
 			inputQueue = params.get("iqueue");
-			outputQueue = params.get("oqueue") ;
+			outputQueue = params.get("oqueue");
+			errorQueue = params.get("equeue");
 			parallelismDegree = params.getInt("parallelism");
 		} catch (Exception e) {
-			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --parallelism <degree of parallelism>'");
+			System.err.println("'LowSpeedDetection --amqpurl <rabbitmq url>  --iqueue <input data queue> --oqueue <output data queue> --equeue <error queue> --parallelism <degree of parallelism>'");
 		}
 	}
 
@@ -103,6 +110,8 @@ public class SimpleAlarmAnalysis {
     			.addSource(btsdatasource)   // deserialization schema for input
     			.setParallelism(parallelismDegree);
 
+
+
 		//Read data from RabbitMQ, parse the data, determine alert and return the alert in a json string
 		// DataStream<String> alerts = btsdatastream
 		// 	.flatMap(new BTSParser())
@@ -110,21 +119,64 @@ public class SimpleAlarmAnalysis {
 		// 	.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
 		// 	.process(new MyProcessWindowFunction());
 
+		// DataStream<String> alerts = btsdatastream
+		// 	.flatMap(new BTSParser())
+		// 	.keyBy(new StatisticsKeySelector())
+		// 	.process(new GlobalStatisticsFunction());
 
-		DataStream<String> alerts = btsdatastream
-			.flatMap(new BTSParser())
-			.keyBy(new StatisticsKeySelector())
-			.process(new MyStatsFunction());
 
-		// Send the alerts to output channel
-		RMQSink<String> sink = new RMQSink<String>(
+		// Parse initial datastream
+		DataStream<BTSEvent> parsedDataStream = btsdatastream.flatMap(new BTSParser());
+
+		// Filter datastream to handle deseralization errors
+		SplitStream<BTSEvent> splitDataStream = parsedDataStream.split(new OutputSelector<BTSEvent>() {
+            @Override
+            public Iterable<String> select(BTSEvent event) {
+                List<String> split = new ArrayList<String>();
+                if (event.isDeserialized) {
+                    split.add("deserialization_ok");
+                }
+                else {
+                    split.add("deserialization_error");
+                }
+                return split;
+            }
+        });
+        DataStream<BTSEvent> filteredDataStream = splitDataStream.select("deserialization_ok");
+        DataStream<BTSEvent> errorDataStream = splitDataStream.select("deserialization_error");
+
+		// Keye datastream by "station_id-datapoint_id-alarm_id"
+		KeyedStream<BTSEvent, String> keyedDataStream = filteredDataStream.keyBy(new StatisticsKeySelector());
+
+		// Process Global Streaming Analytics
+		DataStream<String> analyticsGlobalStream = keyedDataStream.process(new GlobalStatisticsFunction());
+
+		// Process Window Streaming Analytics
+		DataStream<String> analyticsWindowStream = keyedDataStream
+                .window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
+                .process(new MyProcessWindowFunction());
+
+		// Send analytics to the output queue
+		RMQSink<String> analyticsSink = new RMQSink<String>(
 				connectionConfig,
 				outputQueue,
 				new SimpleStringSchema());
-		alerts.addSink(sink);
+		analyticsGlobalStream.addSink(analyticsSink);
+		analyticsWindowStream.addSink(analyticsSink);
 
-		// Use 1 thread to print out the result
-		alerts.print().setParallelism(1);
+		// Send possible errors to the error queue
+		RMQSink<String> errorSink = new RMQSink<String>(
+				connectionConfig,
+				errorQueue,
+				new SimpleStringSchema());
+		errorDataStream.flatMap(new BTSToString()).addSink(errorSink);
+
+		// Print out the result
+		analyticsGlobalStream.print().setParallelism(1);
+		analyticsWindowStream.print().setParallelism(1);
+		errorDataStream.print().setParallelism(1);
+
+		// Execute environment
 		env.execute("CustomerStreamApp");
 	}
 }
