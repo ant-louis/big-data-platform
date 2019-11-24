@@ -9,6 +9,7 @@ public class Statistics {
     public double min; //Keep track of the min value for a special key
     public double max; //Keep track of the max value for a special key
     public double mean; //Keep track of the mean value for a special key
+    public double sum; //Keep track of the sum for a special key (neede to compute the mean)
 
     // Class constructors
     Statistics() {
@@ -17,15 +18,16 @@ public class Statistics {
         this.min = Double.POSITIVE_INFINITY;
         this.max = Double.NEGATIVE_INFINITY;
         this.mean = 0;
+        this.sum = 0;
     }
 
-
-    Statistics(Long counter, Long active_counter, Float min, Float max, Float mean) {
+    Statistics(Long counter, Long active_counter, Double min, Double max, Double mean, Double sum) {
         this.counter = counter;
         this.active_counter = active_counter;
         this.min = min;
         this.max = max;
         this.mean = mean;
+        this.sum = sum;
     }
 
 }

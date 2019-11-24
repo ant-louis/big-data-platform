@@ -31,14 +31,36 @@ public class MyStatsFunction extends KeyedProcessFunction<String, BTSEvent, Stri
         current.counter++;
 
         // Counter of event where alarm is Active
-        if (input.isActive == True) {
+        if (input.isActive) {
             current.active_counter++;
         }
 
+        // Check the min
+        if (input.value < current.min){
+            current.min = input.value;
+        }
+
+        // Check the max
+        if (input.value > current.max){
+            current.max = input.value;
+        }
+
+        // Compute the mean
+        current.sum += input.value;
+        current.mean = current.sum / current.counter;
 
         // Output
-        String key = input.station_id+"-"+input.datapoint_id+"-"+input.alarm_id;
-        out.collect("Key: "+key+" . Counter "+Double.toString(current.counter)+" . Active counter: "+Double.toString(current.active_counter));
+        BTSAlert alert = new BTSAlert(
+            input.station_id,
+            input.datapoint_id,
+            input.alarm_id,
+            Long.toString(current.counter),
+            Long.toString(current.active_counter),
+            Double.toString(current.min),
+            Double.toString(current.max),
+            Double.toString(current.mean)
+            );
+        out.collect(alert.statMessage());
 
         // Update the state
         state.update(current);

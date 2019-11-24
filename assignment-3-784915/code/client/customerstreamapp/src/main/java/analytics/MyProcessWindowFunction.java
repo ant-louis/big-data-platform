@@ -6,6 +6,7 @@ import org.apache.flink.util.Collector;
 
 
 public class MyProcessWindowFunction extends ProcessWindowFunction<BTSEvent, String, String, TimeWindow> {
+    
     // Simple function to detect a sequence of alarms in a round
     @Override
     public void process(String station_id, Context context, Iterable<BTSEvent> records, Collector<String> out) {
@@ -18,7 +19,7 @@ public class MyProcessWindowFunction extends ProcessWindowFunction<BTSEvent, Str
             }   
         }
         if (count > number_active_threshold) {
-            out.collect (new BTSAlarmAlert(station_id,true).toString());
+            out.collect (new BTSAlert(station_id).alarmMessage());
         }
     }
 }

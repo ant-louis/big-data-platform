@@ -5,7 +5,5 @@ analytics/Statistics.class
 analytics/StatisticsKeySelector.class
 analytics/AlarmKeySelector.class
 analytics/BTSParser.class
-analytics/StatisticsFunction.class
-analytics/BTSAlarmAlert.class
 analytics/SimpleAlarmAnalysis.class
-analytics/StatisticsFunction$1.class
+analytics/BTSAlert.class

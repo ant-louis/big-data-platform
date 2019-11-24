@@ -110,10 +110,6 @@ public class SimpleAlarmAnalysis {
 		// 	.window(SlidingProcessingTimeWindows.of(Time.minutes(1), Time.seconds(5)))
 		// 	.process(new MyProcessWindowFunction());
 
-		// DataStream<String> alerts = btsdatastream
-		// 	.flatMap(new BTSParser())
-		// 	.keyBy(new StatisticsKeySelector())
-		// 	.process(new StatisticsFunction());
 
 		DataStream<String> alerts = btsdatastream
 			.flatMap(new BTSParser())
