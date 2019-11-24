@@ -108,27 +108,78 @@ Notice that these kinds of metrics are often available in well-known Big Data Pl
 
 
 ### 5. Architecture design
-```
-Notes: 1 client = 1 subdataset = 2 channels
-* Producer produit des données et les fout dans le tuyau (envoyer ligne par ligne). Le producer tourne en continu normalement et dès qu'il y a une donnée elle s'envoit. Mais nous en pratique comme on n'a pas les capteurs on peut simuler l'envoi row par row.
 
-* ToggleConsumer: permet d'activer et désactiver à la demande le truc qui lit les données sur le front end server. Donc en 2 le client active le toggleconsumer qui va appeler le streammanager sur le front end server.
+The design of my architecture for the streaming analytics service is shown in the Figure below:
 
-* Le streammanager starts le input consumer script et il start Flink. Consumer= vider le tuyau, Flink ne fait juste que regarder le tuyau
-```
+![scheme](figures/schema.png)
+
+#### Pipeline
+Here are the different steps of the pipeline:
+
+1. Customer produces data, i.e. sends data points through a continuous flow to his dedicated channel *in1* in the RabbitMQ Message Broker.
+2. Then, the customer can decide whenever he wants to start/stop the analytics on his data. Toggling the *start_analytics* script will copy the *customerstreamapp* (implemented by the customer) on the Flink server and begin the stream processing on the Flink server.
+3. The Flink job running the *customerstreamapp* of the customer will read data from the input channel of the customer and perform near-realtime analytics on them.
+4. Each analytics performed by the *customerstreamapp* running on the Flink server will be sent to the output channel of the customer in the RabbitMQ Message Broker.
+5. From there, the consumer is able to consumer the messages arriving in his output channel to explore the computed analytics.
+6. Optionally, the analytics performed by the *customerstreamapp* can be stored into the Cassandra database.
+
 
 #### Customer data sources
-In real life, the customer data sources will be sensors that will output data points with a created timestamp. In practice for this project, we already have the datasets of collected data points for each station (each station has its own datatset). Hence, we will simulate the emission of data points from the sensors be reading the *.csv* files row by row at given interval of time, emitting in a message one single row at a time.
+In real life, the customer data sources will be sensors that will output data points with a timestamp created when measure is taken. In practice for this project, we will use data points already collected and stored in a *.csv* file. Hence, we will simulate the emission of data points from the sensors by reading the *.csv* file row by row at given interval of time. The original dataset *bts-data-alarm-2017.csv* has been sorted by timestamp in chronological order to reproduce a real-life emission of data points. It has then been splitted into multiple subdatasets to play with lighter files.
+
 
 #### Mysimbdp message brokers
+RabbitMQ was chosen as the message broker for this project but has not been my first choice. I first tried to implement a streaming pipeline with Apache Kafka + Apache Spark mainly because of the popularity of these tools in the industry. However, I encountered some severe difficulties in the management and connection between the Docker containers of this pipeline, and after multiple days of debugging without solutions, I finally decided to give a chance at RabbitMQ with Flink as streaming analytics service. 
+
+It turned out that RabbitMQ might have some advantages over Kafka: 
+* It offers a variety of features to trade off performance with reliability, including persistence, delivery acknowledgements publisher confirms, and high availability.
+* It is true streaming, contrary to Kafka which actually performs micro-batching.
+* Deployment is easier and lighter than with Kafka, which requires Zookeeper to work properly, so involves to run an extra container.
+* It has highly available queues that can be mirrored across several machines in a cluster, ensuring that even in the event of hardware failure your messages are safe.
+* It supports messaging over a variety of messaging protocols.
+* It offers great clustering, where several RabbitMQ servers on a local network can be clustered together, forming a single logical broker. 
+
+
+In my configuration, each customer has exactly two channels in the RabbitMQ Message Broker: one input channel for him to send his data points, and one output channel to receive the results of the analytics. RabbitMQ Message Broker is running in a Docker container.
+
 
 
 #### Mysimbdp streaming computing service
+As RabbitMQ has been chosen as message broker, I decided to use Flink as the streaming service, as it often is a common choice. Moreover, documentation is highly available on the net and the tutorial of Mr. Truong was really helpful. 
+
+Flink is an excellent choice for multiple reasons. First, it supports both stream and batch processing. In addition, it has a sophisticated state management, event-time processing semantics, and exactly-once consistency guarantees for state. Moreover, Flink can be deployed on various resource providers (YARN, Apache Mesos, Kubernetes) but also as stand-alone cluster. It has been configured for high availability and does not have a single point of failure. Finally, it is highly scalable, delivering high throughput and low latency.
+
+
 
 #### Customer streaming analytics app
+In this project, the customer is expected to implement its own *customerstreamapp* written in the Java programming language and compiled with Maven in order to get a *.jar* file that will run on the Flink server.
+
+
 
 #### Mysimbdp-coredms
+The mysimbdp-coredms component has been designed as a Cassandra database. Apache Cassandra is a free and open-source, distributed, wide column store, NoSQL database management system designed to handle large amounts of data across many commodity servers, providing high availability and scalability with no single point of failure.  In practice, the Cassandra database of this demo is running as a single node in a Docker container.
 
 
-#### Other components
+## Part 2 - Implementation of streaming analytics
 
+### 1. Implemented structures of the input streaming data, output result and data serialization/deserialization for customerstreamapp
+
+
+
+### 2. Key logic of functions for processing events/records in customerstreamapp
+
+
+
+### 3. Discussion about the test environments, the analytics and its performance observations
+
+
+
+### 4. Presentation of the tests and management of wrong data
+
+
+### 5. Parallelism settings: performance and issues
+
+
+
+
+## Part 3 - Connection
