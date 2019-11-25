@@ -46,7 +46,7 @@ public class BTSAlert {
 
     // Methods
     public String alarmMessage() {
-        return "{\"Message Type\":\"Window Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Message\":\"Alarm often gets triggered!.\"}}";
+        return "{\"Message Type\":\"Window Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Message\":\"Alarm often gets triggered!\"}}";
     }
 
 

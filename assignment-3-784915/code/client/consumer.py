@@ -18,8 +18,18 @@ def parse_arguments():
 def callback(ch, method, properties, body):
     """
     """
-    print ("Received:", body, sep=" ")
-    ch.basic_ack(delivery_tag = method.delivery_tag)  # acknowledgment for the task
+    # Decode the bytes message
+    message = body.decode("utf-8")
+
+    # Print in console the rersults of the analytics
+    print("Received:", message)
+
+    # # Append the result to the analytics file
+    # f = open("result_analytics.txt", "a+")
+    # f.write(message + '\n')
+
+    # Ack the received message
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
 
 def run(args):

@@ -164,6 +164,18 @@ The mysimbdp-coredms component has been designed as a Cassandra database. Apache
 
 ### 1. Implemented structures of the input streaming data, output result and data serialization/deserialization for customerstreamapp
 
+The implementation of the *customerstreamapp* can be found in the *code/client/customerstreamapp* repository. More specifically, all the implemented Java classes are available in *code/client/customerstreamapp/src/main/java/analytics*. Let's now describe the pipeline for the processing of an event.
+
+First, the input data stream starts from the customer side, where the latter will continuously send data points from his sensors to the platform. In practice, each record sent is serialized as a String respecting the following format:
+````
+"station_id,datapoint_id,alarm_id,event_time,value,valueThreshold,isActive,storedtime"
+```` 
+It actually corresponds to one line of the *.csv* dataset used in this project, encoded as a String. In real life, I assume that the sensors will output a String in the same format each time they create a data point. This format is thus the standard format expected by the platform to perform the implemented analytics. Note that the management of a bad format has been handled and is explained later in Question 2.4.
+
+Once the platform received a line in the described format, it will deserialize. The deserialization si performed  it by creating a Java object called *BTSEvent*
+
+
+
 
 
 ### 2. Key logic of functions for processing events/records in customerstreamapp

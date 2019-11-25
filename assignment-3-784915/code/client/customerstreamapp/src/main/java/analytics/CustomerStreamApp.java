@@ -40,7 +40,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 
-public class SimpleAlarmAnalysis {
+public class CustomerStreamApp {
 
 	// Variables
 	private static String input_rabbitMQ;

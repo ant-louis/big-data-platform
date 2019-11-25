@@ -1,11 +1,11 @@
+analytics/CustomerStreamApp.class
 analytics/MyProcessWindowFunction.class
 analytics/BTSEvent.class
 analytics/Statistics.class
+analytics/CustomerStreamApp$1.class
 analytics/StatisticsKeySelector.class
 analytics/AlarmKeySelector.class
 analytics/BTSParser.class
 analytics/BTSToString.class
 analytics/GlobalStatisticsFunction.class
-analytics/SimpleAlarmAnalysis$1.class
-analytics/SimpleAlarmAnalysis.class
 analytics/BTSAlert.class
