@@ -78,11 +78,9 @@ Another alternative would be to re-generate timestamps when the messages arrive 
 
 **(ii) Types of windows to develop for the analytics**
 
-In this project, I chose to implement sliding windows of fixed sizes. Hence, a given window in a keyed stream will contain *n* data points from which the first half will already have been analyzed, processed and ingested into the database, and the second half not yet. This mechanism allows us to perform consistency check among "past" and "future" values which is very useful in an IoT context.
+In this project, I chose to implement sliding windows. Now, two kinds of windows might be considered: timing windows and fixed size windows. A timing window will consider a given interval of time in which the incoming elements will be processed (for e.g., process the elements that came in the last minute). At the opposite, fixed size window will take into account a given number of data points and process these points. Both types of windows might be suitable for our application. However, it also depends on the intrinsic characteristics of the sensors, particularly of their frequency of emission. This strengthens even more my choice to consider keyed streams, as independent windows can be set individually for each sensor. Indeed, if a sensor only emits a few data points every hour, then it wouldn't make any sense to consider a timing window of a few seconds. In that case, a larger interval of time must be considered, or a fixed size window should be chosen.
 
-Now, two kinds of windows might be considered: timing windows and fixed size windows. A timing window will consider a given interval of time in which the elements where timestamps correspond will be processed. At the opposite, fixed size window will take into account a given number of data points, whatever their timestamps, and process these points. Both types of windows might be suitable for our application. However, it also depends on the intrinsic characteristics of the sensors, particularly of their frequency of emission. This strengthens even more my choice to consider keyed streams, as independent windows can be set individually for each sensor. Indeed, if a sensor only emits a few data points every hour, then it wouldn't make any sense to consider a timing window of a few seconds. In that case, a larger interval of time must be considered, or a fixed size window should be chosen.
-
-It is difficult to draw out these types of windows as they both might be suitable for our dataset. For the ease of this project, I chose to use fixed size windows of a given number of elements *n*.
+It is difficult to draw out these types of windows as they both might be suitable for our dataset. In this project, I chose to implement sliding timing windows for a time window of 1 minute, refreshed all 5 seconds.
 
 Notice that in practice, the consumer should also have the choice to impose which kind of windows better match his application, as he is the one to exactly know the data he is sending to the platform.
 
@@ -164,41 +162,63 @@ The mysimbdp-coredms component has been designed as a Cassandra database. Apache
 
 ### 1. Implemented structures of the input streaming data, output result and data serialization/deserialization for customerstreamapp
 
-#### Data production
-The implementation of the *customerstreamapp* can be found in the *code/client/customerstreamapp* repository. More specifically, all the implemented Java classes are available in *code/client/customerstreamapp/src/main/java/analytics*, and the main class is called *CustomerStreamApp.java*.
+The implementation of the *customerstreamapp* can be found in the *code/client/customerstreamapp* repository. More specifically, all the implemented Java classes are available in *code/client/customerstreamapp/src/main/java/analytics*, and the main class is called *CustomerStreamApp.java*. Let's now describe the pipeline for the processing of an input event, and the progressive transformations of the data stream.
 
-Let's now describe the pipeline for the processing of an event. First, the input data stream starts from the customer side, where the latter will continuously send data points from his sensors to the platform. In practice, each record sent is serialized as a String respecting the following format:
+
+#### Input Data Stream
+ First, the input data stream starts from the customer side, where the latter will continuously send data points from his sensors to the platform. In practice, each record sent is serialized as a String respecting the following format:
 ````
 "station_id,datapoint_id,alarm_id,event_time,value,valueThreshold,isActive,storedtime"
 ```` 
 It actually corresponds to one line of the *.csv* dataset used in this project, encoded as a String. In real life, I assume that the sensors will output a String in the same format each time they create a data point. This format is thus the standard format expected by the platform to perform the implemented analytics. Note that the management of a bad format has been handled and is explained later in Point 2.4. The code for the production of data can be found in *code/client/producer.py*.
 
 
-#### Data deserialization in the platform
+#### Deserialized Data Stream
 Once the platform received a line in the described format, it will deserialize it. The deserialization is performed by applying a *flatMap* on the original input data stream that will parse (*BTSParser.java*) each input String to retrieve the values of the different features and create a *BTSEvent* object whose class variables correspond to these features. As a result, the input data stream is now converted into a data stream of *BTSEvent* objects.
 
-#### Data stream splitting to handle bad format events
-After having been parsed, the resulting data stream is then split to two data streams: one corresponding to the *BTSEvent* that have been properly created thanks to a String input line encoded in the proper expected format, and another data stream that will only collect the *BTSEvent* objects that were not properly deserialized due to a bad format. Further details are given in Point 2.4.
+#### Split Data Streams
+After having been parsed the stream, the resulting data stream is then split to two data streams: one corresponding to the *BTSEvent* that have been properly created thanks to a String input line encoded in the proper expected format, and another data stream that will only collect the *BTSEvent* objects that were not properly deserialized due to a bad format. Further details are given in Point 2.4.
 
-#### Keyed Data Streams
-The latter data stream of valid *BTSEvent* objects will then be split into multiple keyed data streams with the *keyBy* function taking as argument a *StatisticsKeySelector* object (returning the key associated to a particular *BTSEvent*). As discussed in the first part, this choice was made to perform more precise analytics on specific stations/sensors/alarms. As a key, I chose to to use the concatenation of the *station_id*, *datapoint_id* and *alarm_id* in the following String format:
+#### Keyed Data Stream
+The latter data stream of valid *BTSEvent* objects will then be converted into a *KeyedStream* with the *keyBy* function taking as argument a *StatisticsKeySelector* object (returning the key associated to a particular *BTSEvent*). This will partition the stream into disjoint partitions, where all records with the same key are assigned to the same partition. As discussed in the first part, this choice was made to perform more precise analytics on specific stations/sensors/alarms. As a key, I chose to to use the concatenation of the *station_id*, *datapoint_id* and *alarm_id* in the following String format:
 ````
 "station_id-datapoint_id-alarm_id"
 ````
 Therefore, the analytics explained in the next sections will be specific to a particular alarm, triggered by a specific sensor in a given station.
 
 
-#### Processing
+#### Windowed Data Stream
+From the resulting keyed data stream, the *window* function is applied with a sliding timing window of 1 minute, refreshed every 5 seconds, to create a windowed data stream that will later be processed by the function *MyProcessWindowFunction*.
 
+
+#### Processed Data Stream
+Two kinds of analytics are performed in this project, on two different streams, thanks to the *process* function applied on the streams. First, a function called *MyProcessWindowFunction* is performed on the windowed data stream. In addition, a function *GlobalStatisticsFunction* is performed on the keyed data stream. These two functions are explained in Point 2.2.
 
 
 #### Serialization and output result
+The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, always end their execution by creating an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a String formatted as a *.json* file. Therefore, the final data stream will be a stream of String containing the results of the analytics. For example, here is an output message that the customer will receive in his output channel:
+````
+{"Message Type":"Global Streaming Analytics","Content":{"Station":1161115040,"Sensor":141,"Alarm":312,"Events counter":1,"Active alarms counter":1,"Minimum value":56.5,"Maximum value":56.5,"Mean value":56.5}}
+````
+This message concerned the analytics performed on the keyed stream with the *GlobalStatisticsFunction*, explained in the next point.
 
-
+The customer, on his side, listens to his output channel *out1* and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.txt*, to let the customer analyze properly the outputted results of the analytics.
 
 
 
 ### 2. Key logic of functions for processing events/records in customerstreamapp
+
+Two functions were implemented in this project: one performed on the windowed data stream, and another on the keyed data stream.
+
+#### MyProcessWindowFunction
+This function is inspired from the tutorial of Mr. Truong. It basically counts the number of time that a given alarm is active for a particular sensor in a given station (key of the keyed stream), and create an alert when it exceeds a given threshold (the threshold is set to 5 in this demo). Hence, when the threshold is exceeded, the function outputs a *.json* file embedded in a String, that has the following format:
+````
+{"Message Type":"Window Streaming Analytics","Content":{"Station":1161115040,"Sensor":141,"Alarm":312,"Message":"Alarm often gets triggered!"}}
+````
+
+
+#### GlobalStatisticsFunction
+
 
 
 

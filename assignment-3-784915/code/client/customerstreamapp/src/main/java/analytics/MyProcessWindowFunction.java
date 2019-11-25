@@ -12,7 +12,7 @@ public class MyProcessWindowFunction extends ProcessWindowFunction<BTSEvent, Str
     public void process(String key, Context context, Iterable<BTSEvent> records, Collector<String> out) {
         
         // Variables
-        int number_active_threshold = 5; //for study purpose
+        int number_active_threshold = 5;
         int count = 0;
 
         // Split the key to get the different ids
