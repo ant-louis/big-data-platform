@@ -118,7 +118,7 @@ public class CustomerStreamApp {
 				new SimpleStringSchema());
 		analyticsGlobalStream.addSink(sink);
 		analyticsWindowStream.addSink(sink);
-		errorDataStream.flatMap(new BTSToString()).addSink(sink);
+		errorDataStream.flatMap(new BTSError()).addSink(sink);
 
 		// Print out the result
 		analyticsGlobalStream.print().setParallelism(1);

@@ -17,13 +17,15 @@ public class BTSAlert {
     public String max;
     public String mean;
     public String error;
+    public String nbErrors;
 
 
     // Class constructors
     public BTSAlert() {}
 
-    public BTSAlert(String error) {
+    public BTSAlert(String error, String nbErrors) {
         this.error = error;
+        this.nbErrors = nbErrors;
     }
 
     public BTSAlert(String station_id, String datapoint_id, String alarm_id) {
@@ -46,17 +48,17 @@ public class BTSAlert {
 
     // Methods
     public String alarmMessage() {
-        return "{\"Message Type\":\"Window Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Message\":\"Alarm often gets triggered!\"}}";
+        return "{\"Message Type\":\"WindowStreamingAnalytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Message\":\"Alarm often gets triggered!\"}}";
     }
 
 
     public String statMessage() {
-        return "{\"Message Type\":\"Global Streaming Analytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Events counter\":"+counter+",\"Active alarms counter\":"+active_counter+",\"Minimum value\":"+min+",\"Maximum value\":"+max+",\"Mean value\":"+mean+"}}";
+        return "{\"Message Type\":\"GlobalStreamingAnalytics\",\"Content\":{\"Station\":"+station_id+",\"Sensor\":"+datapoint_id+",\"Alarm\":"+alarm_id+",\"Events counter\":"+counter+",\"Active alarms counter\":"+active_counter+",\"Minimum value\":"+min+",\"Maximum value\":"+max+",\"Mean value\":"+mean+"}}";
     }
 
 
     public String errorMessage() {
-        return "{\"Message Type\":\"Error\",\"Content\":{\"Message\":"+error+"}}";
+        return "{\"Message Type\":\"DeserializationError\",\"Content\":{\"Error line\":"+error+",\"Total number of errors\":"+nbErrors+"}}";
     }
 
 }

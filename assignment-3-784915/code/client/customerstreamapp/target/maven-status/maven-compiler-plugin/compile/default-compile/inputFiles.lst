@@ -1,7 +1,10 @@
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/Statistics.java
 /Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/BTSEvent.java
-/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/NewFunction.java
-/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/BTSAlarmAlert.java
 /Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/MyProcessWindowFunction.java
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/GlobalStatisticsFunction.java
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/CustomerStreamApp.java
 /Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/BTSParser.java
-/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/SimpleAlarmAnalysis.java
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/BTSAlert.java
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/BTSError.java
+/Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/StatisticsKeySelector.java
 /Users/antoinelouis/Documents/Aalto/Cours/BDP/Project/assignment-3-784915/code/client/customerstreamapp/src/main/java/analytics/AlarmKeySelector.java

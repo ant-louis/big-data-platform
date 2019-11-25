@@ -24,9 +24,9 @@ def callback(ch, method, properties, body):
     # Print in console the rersults of the analytics
     print("Received:", message)
 
-    # # Append the result to the analytics file
-    # f = open("result_analytics.txt", "a+")
-    # f.write(message + '\n')
+    # Append the result to the analytics file
+    f = open("result_analytics.log", "a+")
+    f.write(message + '\n')
 
     # Ack the received message
     ch.basic_ack(delivery_tag = method.delivery_tag)

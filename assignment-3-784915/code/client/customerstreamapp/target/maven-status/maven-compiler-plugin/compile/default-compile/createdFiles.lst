@@ -6,6 +6,6 @@ analytics/CustomerStreamApp$1.class
 analytics/StatisticsKeySelector.class
 analytics/AlarmKeySelector.class
 analytics/BTSParser.class
-analytics/BTSToString.class
 analytics/GlobalStatisticsFunction.class
+analytics/BTSError.class
 analytics/BTSAlert.class

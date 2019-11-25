@@ -196,7 +196,7 @@ Two kinds of analytics are performed in this project, on two different streams, 
 
 
 #### Serialization and output result
-The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, will return String objects as the result of their analytics. More specifically, they will create an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a *.json* file embedded in a String containing all the computed analytics. Therefore, the final data stream will be a stream of String containing the results of the analytics. The customer, on his side, listens to his output channel and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.txt*, to let the customer analyze properly the outputted results of the analytics.
+The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, will return String objects as the result of their analytics. More specifically, they will create an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a *.json* file embedded in a String containing all the computed analytics. Therefore, the final data stream will be a stream of String containing the results of the analytics. The customer, on his side, listens to his output channel and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.log*, to let the customer analyze properly the outputted results of the analytics.
 
 Examples of the output messages are given in the next point for each function.
 
@@ -244,7 +244,7 @@ In order to run the Docker containers, I gave Docker 4 CPUs and 6 Go of RAM.
 
 
 #### Results of the analytics
-The results of the analytics can be found in the file *code/client/result_analytics.txt*. It shows the messages concerning the windowing function and the statistics one. These two can be differentiated by the field "Message Type" in the received *.json* files.
+The results of the analytics can be found in the file *code/client/result_analytics.log*. It shows the messages concerning the windowing function and the statistics one. These two can be differentiated by the field "Message Type" in the received *.json* files.
 
 
 ### 4. Presentation of the tests and management of wrong data

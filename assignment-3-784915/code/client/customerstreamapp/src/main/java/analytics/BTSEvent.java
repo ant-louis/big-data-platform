@@ -19,7 +19,7 @@ public class BTSEvent {
     public float valueThreshold;
     public boolean isActive;
     public boolean isDeserialized;
-    public String error;
+    public String errorLine;
 
     // Class constructors
     BTSEvent() {}
@@ -33,11 +33,11 @@ public class BTSEvent {
         this.valueThreshold = valueThreshold;
         this.isActive = isActive;
         this.isDeserialized = true;
-        this.error = null;
+        this.errorLine = null;
     }
 
-    BTSEvent(String error) throws Exception {
+    BTSEvent(String errorLine) throws Exception {
         this.isDeserialized = false;
-        this.error = error;
+        this.errorLine = errorLine;
     }
 }

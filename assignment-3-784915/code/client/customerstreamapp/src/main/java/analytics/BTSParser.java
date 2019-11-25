@@ -33,7 +33,7 @@ public class BTSParser implements FlatMapFunction<String, BTSEvent> {
             }
             catch (Exception e) {
                 // Create special event for deserialisation error
-                BTSEvent event = new BTSEvent("Deserialization error for the line: '"+line+"'");
+                BTSEvent event = new BTSEvent("'"+line+"'");
                 out.collect(event);
             }  
     }
