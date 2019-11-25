@@ -192,17 +192,13 @@ From the resulting keyed data stream, the *window* function is applied with a sl
 
 
 #### Processed Data Stream
-Two kinds of analytics are performed in this project, on two different streams, thanks to the *process* function applied on the streams. First, a function called *MyProcessWindowFunction* is performed on the windowed data stream. In addition, a function *GlobalStatisticsFunction* is performed on the keyed data stream. These two functions are explained in Point 2.2.
+Two kinds of analytics are performed in this project, on two different streams, thanks to the *process* function applied on the streams. First, a function called *MyProcessWindowFunction* is performed on the windowed data stream. In addition, a function *GlobalStatisticsFunction* is performed on the keyed data stream. These two functions are explained in Point 2.2. The processing of either data stream convert them into a final data stream of String that will be outputted on the output channel of the customer. Serialization of the output result is explained in the next point.
 
 
 #### Serialization and output result
-The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, always end their execution by creating an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a String formatted as a *.json* file. Therefore, the final data stream will be a stream of String containing the results of the analytics. For example, here is an output message that the customer will receive in his output channel:
-````
-{"Message Type":"Global Streaming Analytics","Content":{"Station":1161115040,"Sensor":141,"Alarm":312,"Events counter":1,"Active alarms counter":1,"Minimum value":56.5,"Maximum value":56.5,"Mean value":56.5}}
-````
-This message concerned the analytics performed on the keyed stream with the *GlobalStatisticsFunction*, explained in the next point.
+The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, will return String objects as the result of their analytics. More specifically, they will create an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a *.json* file embedded in a String containing all the computed analytics. Therefore, the final data stream will be a stream of String containing the results of the analytics. The customer, on his side, listens to his output channel and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.txt*, to let the customer analyze properly the outputted results of the analytics.
 
-The customer, on his side, listens to his output channel *out1* and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.txt*, to let the customer analyze properly the outputted results of the analytics.
+Examples of the output messages are given in the next point for each function.
 
 
 
@@ -218,15 +214,45 @@ This function is inspired from the tutorial of Mr. Truong. It basically counts t
 
 
 #### GlobalStatisticsFunction
+This function applies on the keyed data stream, and basically computes statistics about incoming data for each key. The statistics include the following:
+* Count the number of incoming events for each key;
+* Count the number of incoming events where the alarm was active for each key;
+* Store the minimum value for each key;
+* Store the maximum value for each key;
+* Store the mean value for each key;
 
+These simple statistics may be for useful for the customer at the end of the day. Let's suppose that the customer launch the analytics job at the beginning of the day, and looks at the results at the end of the day. He can quickly analyze the number of times that a sensor triggered a particular alarm in a given station. Making the ratio with the total number of events received from that sensor, he can easily computes the percentage of alarm activation for that sensor. Storing the minimum and maximum value can allow the customer to notice a highly unusual behavior of one of his machine during the day. Finally, the mean value can help him analyze once again if a given machine has behaved normally during the whole day, by taking a mean reference value for example.
+
+
+Let's now go a bit deeper in the technical details. As this function is applied on the keyed stream, there will be exactly 6 variables to store per key, the mean being computed by storing a sum variable and dividing it by the events counter. In order to manage that, I created a *ValueState* object implemented with the *Statistics* class, i.e. that each key will have their state instance keeping track of their statistics variables. The computations are then quite simple: it comes down to update the counters and the mean, and possibly the min and max variables of the state. Then, after each update (each *BTSEvent* analyzed), the function creates a new *BTSAlert* with the current statistics and call the method *statMessage* of the *BTSAlert* that will return a *.json* file embedded in a string, that has the following format:
+````
+{"Message Type":"Global Streaming Analytics","Content":{"Station":1161115010,"Sensor":121,"Alarm":308,"Events counter":8,"Active alarms counter":4,"Minimum value":240.0,"Maximum value":241.0,"Mean value":240.5}}
+````
 
 
 
 ### 3. Discussion about the test environments, the analytics and its performance observations
 
+#### Tests environment
+All the tests were performed in local on my machine, a Macbook Pro (15-inch, 2018) with a processor 2,2 GHz Intel Core i7 6 cores and 16 Go 2400 MHz DDR4 of RAM. The streaming pipeline is implemented with multiple Docker containers, described below:
+* *rabbit*: the RabbitMQ Message Broker;
+* *cassandra*: the Cassandra database;
+* *flink-jobmanager*: the Job Manager for the Flink analytics;
+* *flink-taskmanager*: one Task Manager for the Flink analytics;
+
+In order to run the Docker containers, I gave Docker 4 CPUs and 6 Go of RAM.
+
+
+#### Results of the analytics
+The results of the analytics can be found in the file *code/client/result_analytics.txt*. It shows the messages concerning the windowing function and the statistics one. These two can be differentiated by the field "Message Type" in the received *.json* files.
 
 
 ### 4. Presentation of the tests and management of wrong data
+
+#### Tests
+
+
+#### Handling wrong data
 As previously mentioned, the management of badly formatted input String line is handled within and after the deserialization process. Let's detail the *BTSParser* handle a badly formatted String line.
 
 As a reminder, the *BTSParser* parses a String line to retrieve the values of the different features, and then create a *BTSEvent* with these features. But what happens if an element is missing, or a type doesn't match the expected type of the feature, or the line doesn't even correspond to the expected features but is instead a random text? Well, the creation of the *BTSEvent* in the *BTSParser* is actually encapsulated in a *try-catch*. As a result, if anything goes wrong when the constructor of the *BTSEvent* is called (for one of the reasons mentioned above), the exception is caught. From there, another constructor of *BTSEvent* is called, taking in parameters only one argument: the String line that caused the exception. In addition, a class variable called *isDeserialized* is set to *false*, meaning that a problem occurred during the usual creation of a *BTSEvent* and that a special "error" *BTSEvent* was created. Note that this field is set to *true* when everything went well.
@@ -240,8 +266,8 @@ As a result, we get a stream of valid *BTSEvent* that can further be processed. 
 
 
 
-
 ### 5. Parallelism settings: performance and issues
+A Flink program consists of multiple tasks (transformations, data sources, and sinks), where each task is split into a given number of parallel instances for execution, each instance processing a subset of the task’s input data. In this demo, the parallelism was initially set to 1.
 
 
 
