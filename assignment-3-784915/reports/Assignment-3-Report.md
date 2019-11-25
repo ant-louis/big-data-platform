@@ -125,7 +125,7 @@ Here are the different steps of the pipeline:
 
 
 #### Customer data sources
-In real life, the customer data sources will be sensors that will output data points with a timestamp created when measure is taken. In practice for this project, we will use data points already collected and stored in a *.csv* file. Hence, we will simulate the emission of data points from the sensors by reading the *.csv* file row by row at given interval of time. The original dataset *bts-data-alarm-2017.csv* has been sorted by timestamp in chronological order to reproduce a real-life emission of data points. It has then been splitted into multiple subdatasets to play with lighter files.
+In real life, the customer data sources will be sensors that will output data points with a timestamp created when measure is taken. In practice for this project, we will use data points already collected and stored in a *.csv* file. Hence, we will simulate the emission of data points from the sensors by reading the *.csv* file row by row at given interval of time. The original dataset *bts-data-alarm-2017.csv* has been sorted by timestamp in chronological order to reproduce a real-life emission of data points. It has then been split into multiple subdatasets to play with lighter files.
 
 
 #### Mysimbdp message brokers
@@ -164,15 +164,35 @@ The mysimbdp-coredms component has been designed as a Cassandra database. Apache
 
 ### 1. Implemented structures of the input streaming data, output result and data serialization/deserialization for customerstreamapp
 
-The implementation of the *customerstreamapp* can be found in the *code/client/customerstreamapp* repository. More specifically, all the implemented Java classes are available in *code/client/customerstreamapp/src/main/java/analytics*. Let's now describe the pipeline for the processing of an event.
+#### Data production
+The implementation of the *customerstreamapp* can be found in the *code/client/customerstreamapp* repository. More specifically, all the implemented Java classes are available in *code/client/customerstreamapp/src/main/java/analytics*, and the main class is called *CustomerStreamApp.java*.
 
-First, the input data stream starts from the customer side, where the latter will continuously send data points from his sensors to the platform. In practice, each record sent is serialized as a String respecting the following format:
+Let's now describe the pipeline for the processing of an event. First, the input data stream starts from the customer side, where the latter will continuously send data points from his sensors to the platform. In practice, each record sent is serialized as a String respecting the following format:
 ````
 "station_id,datapoint_id,alarm_id,event_time,value,valueThreshold,isActive,storedtime"
 ```` 
-It actually corresponds to one line of the *.csv* dataset used in this project, encoded as a String. In real life, I assume that the sensors will output a String in the same format each time they create a data point. This format is thus the standard format expected by the platform to perform the implemented analytics. Note that the management of a bad format has been handled and is explained later in Question 2.4.
+It actually corresponds to one line of the *.csv* dataset used in this project, encoded as a String. In real life, I assume that the sensors will output a String in the same format each time they create a data point. This format is thus the standard format expected by the platform to perform the implemented analytics. Note that the management of a bad format has been handled and is explained later in Point 2.4. The code for the production of data can be found in *code/client/producer.py*.
 
-Once the platform received a line in the described format, it will deserialize. The deserialization si performed  it by creating a Java object called *BTSEvent*
+
+#### Data deserialization in the platform
+Once the platform received a line in the described format, it will deserialize it. The deserialization is performed by applying a *flatMap* on the original input data stream that will parse (*BTSParser.java*) each input String to retrieve the values of the different features and create a *BTSEvent* object whose class variables correspond to these features. As a result, the input data stream is now converted into a data stream of *BTSEvent* objects.
+
+#### Data stream splitting to handle bad format events
+After having been parsed, the resulting data stream is then split to two data streams: one corresponding to the *BTSEvent* that have been properly created thanks to a String input line encoded in the proper expected format, and another data stream that will only collect the *BTSEvent* objects that were not properly deserialized due to a bad format. Further details are given in Point 2.4.
+
+#### Keyed Data Streams
+The latter data stream of valid *BTSEvent* objects will then be split into multiple keyed data streams with the *keyBy* function taking as argument a *StatisticsKeySelector* object (returning the key associated to a particular *BTSEvent*). As discussed in the first part, this choice was made to perform more precise analytics on specific stations/sensors/alarms. As a key, I chose to to use the concatenation of the *station_id*, *datapoint_id* and *alarm_id* in the following String format:
+````
+"station_id-datapoint_id-alarm_id"
+````
+Therefore, the analytics explained in the next sections will be specific to a particular alarm, triggered by a specific sensor in a given station.
+
+
+#### Processing
+
+
+
+#### Serialization and output result
 
 
 
@@ -187,6 +207,18 @@ Once the platform received a line in the described format, it will deserialize. 
 
 
 ### 4. Presentation of the tests and management of wrong data
+As previously mentioned, the management of badly formatted input String line is handled within and after the deserialization process. Let's detail the *BTSParser* handle a badly formatted String line.
+
+As a reminder, the *BTSParser* parses a String line to retrieve the values of the different features, and then create a *BTSEvent* with these features. But what happens if an element is missing, or a type doesn't match the expected type of the feature, or the line doesn't even correspond to the expected features but is instead a random text? Well, the creation of the *BTSEvent* in the *BTSParser* is actually encapsulated in a *try-catch*. As a result, if anything goes wrong when the constructor of the *BTSEvent* is called (for one of the reasons mentioned above), the exception is caught. From there, another constructor of *BTSEvent* is called, taking in parameters only one argument: the String line that caused the exception. In addition, a class variable called *isDeserialized* is set to *false*, meaning that a problem occurred during the usual creation of a *BTSEvent* and that a special "error" *BTSEvent* was created. Note that this field is set to *true* when everything went well.
+
+That way, whatever the format of the incoming line, a *BTSEvent* is created and the stream is never interrupted. Now, back to the *CustomerStreamApp* streaming pipeline, the result of the *flatMap* with the *BTSParser* outputs a data stream of *BTSEvent* that will then be split into two *BTSEvent* data streams: one of valid events (checked with the *isDeserialized* instance variable of the event), and the other of invalid events (where a deserialization error occurred due to a bad format, where the *isDeserialized* instance variable of the event is thus set to *false*). The splitting is performed by creating a *SplitStream* by applying the *split* function to the parsed data stream.
+
+As a result, we get a stream of valid *BTSEvent* that can further be processed. The "error" stream is just outputted in the output channel of the customer in a *.json* format to let him know which line was badly formatted. The outputted message is of the following form:
+````
+{"Message Type":"Error","Content":{"Message":Deserialization error for the line: 'THIS LINE IS WRONG'}}
+````
+
+
 
 
 ### 5. Parallelism settings: performance and issues
