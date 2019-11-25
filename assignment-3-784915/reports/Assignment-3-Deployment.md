@@ -32,19 +32,35 @@ Notice that downloading and installing the different images might take some time
 Note that UI are available for Flink and RabbitMQ in your web browser at *'localhost:8081'* and *'localhost:15672'* respectively. See more details on the ports and access in the *docker-compose.yml* file. 
 
 
-### 2. Start the streaming analytics
-In order to start the streaming analytics job of our demo customer, run the following commands in the *code/client/customerstreamapp/* repository:
+### 2. Deploy the streaming analytics app
+In this demo, the Java app has been compiled into a *.jar* file available in *code/client/customerstreamapp/target/CustomerStreamApp-0.1-SNAPSHOT.jar*. By default, when the Flink Job Manager Docker starts, it copies this file at its root. The customer then just have to launch the analytics job by executing this file (see next point).
+
+In the case where the customer would want to modify his customerstreamapp Java project, he must follow the next steps:
+1. Compile the Java project with Maven by running the following command in the *code/client/customerstreamapp/* repository:
 ```bash
-chmod +x start-analytics.sh
-./start-analytics.sh
+mvn install
 ```
-This will first copy the *.jar* file of the customerstreamapp to the Flink Job Manager, and then run it by creating two queues for the customer: the input queue of the stream *'in1* and the output queue *'out1'*. Once the job is launched, Flink will listen at *'in1* for incoming records to process. After the processing, it will send its analytics to *'out1* which can later be consumed by the customer.
+2. Copy the new compiled *.jar* file to the running Flink Job Manager Docker, by executing the following command:
+```bash
+docker cp target/CustomerStreamApp-0.1-SNAPSHOT.jar flink-jobmanager:/analyticsjob.jar
+```
 
 
-### 3. Sending data to the Message Broker
+### 3. Start the streaming analytics job
+In order to start the streaming analytics for the customer's data, run the following command in the *code/client/* repository:
+```bash
+python toggle.py
+```
+Some optional parameters can be added to this line of code:
+* *---iqueue*: Name of the input queue. Default is in1.
+* *--oqueue*: Name of the output queue. Default is out1.
+* *--parallelism*: Level off parallelism for Flink. Default is 1.
+
+
+### 4. Produce data
 In order to simulate the production of data that is sent to the message broker, run the following command in the *code/clients/* repository:
 ```bash
-python producer.py
+python produce.py
 ```
 Some optional parameters can be added to this line of code:
 * *--queue_name*: Name of the queue. Default is in1.
@@ -52,10 +68,10 @@ Some optional parameters can be added to this line of code:
 
 
 
-### 4. Consuming data from the Message Broker
+### 5. Consume analytics results
 In order to consume the analytical messages computed with the customerstreamapp that queued in the output channel of the customer, run the following command in the *code/clients/* repository:
 ```bash
-python consumer.py
+python consume.py
 ```
 Some optional parameters can be added to this line of code:
 * *--queue_name*: Name of the queue. Default is out1.

@@ -244,7 +244,7 @@ In order to run the Docker containers, I gave Docker 4 CPUs and 6 Go of RAM.
 
 
 #### Results of the analytics
-The results of the analytics can be found in the file *code/client/result_analytics.log*. It shows the messages concerning the windowing function and the statistics one. These two can be differentiated by the field "Message Type" in the received *.json* files.
+The results of the analytics can be found in the file *code/client/result_analytics.log*. It shows the result messages of both the *MyProcessWindowFunction* and the *GlobalStatisticsFunction*. These two can be differentiated by the field "Message Type" in the received *.json* files. The message type is set to "WindowStreamingAnalytics" for the result of *MyProcessWindowFunction*, and to "GlobalStreamingAnalytics" for the result of *GlobalStatisticsFunction*. In addition, this *.log* file also contains messages of the type "DeserializationError", which happens when an input line has not been deserialized properly (see next point for further explanations).
 
 
 ### 4. Presentation of the tests and management of wrong data
@@ -267,7 +267,10 @@ As a result, we get a stream of valid *BTSEvent* that can further be processed. 
 
 
 ### 5. Parallelism settings: performance and issues
-A Flink program consists of multiple tasks (transformations, data sources, and sinks), where each task is split into a given number of parallel instances for execution, each instance processing a subset of the task’s input data. In this demo, the parallelism was initially set to 1.
+A Flink program consists of multiple tasks (transformations, data sources, and sinks), where each task is split into a given number of parallel instances for execution, each instance processing a subset of the task’s input data. In this demo, the parallelism was initially set to 1. 
+
+
+RMQSource pas parallisable par defaut
 
 
 

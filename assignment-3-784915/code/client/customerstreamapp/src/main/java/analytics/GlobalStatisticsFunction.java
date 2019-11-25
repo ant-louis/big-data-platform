@@ -21,7 +21,7 @@ public class GlobalStatisticsFunction extends KeyedProcessFunction<String, BTSEv
 
     @Override
     public void processElement(BTSEvent input, Context context, Collector<String> out) throws Exception{
-        // Access the state value
+        // Access the state value 
         Statistics current = state.value();
         if (current == null) {
             current = new Statistics();

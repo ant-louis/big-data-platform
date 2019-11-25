@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>cs-e4640</groupId>
-  <artifactId>mysimbdp</artifactId>
-  <name>Flink Mysimbdp Job</name>
+  <groupId>analytics</groupId>
+  <artifactId>CustomerStreamApp</artifactId>
+  <name>Stream Analytics App job</name>
   <version>0.1-SNAPSHOT</version>
   <build>
     <pluginManagement>
@@ -115,17 +115,6 @@
       </dependencies>
     </profile>
   </profiles>
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots />
-      <id>apache.snapshots</id>
-      <name>Apache Development Snapshot Repository</name>
-      <url>https://repository.apache.org/content/repositories/snapshots/</url>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>org.apache.flink</groupId>
