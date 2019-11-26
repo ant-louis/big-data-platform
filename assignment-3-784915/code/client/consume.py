@@ -3,6 +3,9 @@ import pika, os, logging, sys, time
 import argparse
 import random
 
+# Global variables for the test
+test_counter = 0
+
 
 def parse_arguments():
     """
@@ -31,15 +34,22 @@ def callback(ch, method, properties, body):
     # Ack the received message
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
+    # # !! Only for performance tests !!
+    # # Increment counter variable. When it has read the test_csv, stop the callback.
+    # global test_counter
+    # test_counter += 1
+    # if test_counter >= 1000:
+    #     sys.exit(0)
 
-def run(args):
+
+def run(queue_name):
     """
     """
     # Connect to the channel
-    print("Connecting to the channel {}...".format(args.queue_name))
+    print("Connecting to the channel {}...".format(queue_name))
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=args.queue_name, durable=False)  # mark both the queue and messages as durable to make sure that messages aren't lost.
+    channel.queue_declare(queue=queue_name, durable=False)  # mark both the queue and messages as durable to make sure that messages aren't lost.
     print("Connected !")
 
     # Don't give more than one message to a worker at a time.
@@ -47,14 +57,14 @@ def run(args):
 
     # Consume messages
     print('Waiting for messages. To exit press CTRL+C')
-    channel.basic_consume(queue=args.queue_name, on_message_callback=callback)  #, auto_ack=True
+    channel.basic_consume(queue=queue_name, on_message_callback=callback)  #auto_ack=True
     channel.start_consuming()
 
     # Close connection
-    print("Closing connection to the channel {}...".format(args.queue_name))
+    print("Closing connection to the channel {}...".format(queue_name))
     connection.close()
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    run(args)
+    run(args.queue_name)

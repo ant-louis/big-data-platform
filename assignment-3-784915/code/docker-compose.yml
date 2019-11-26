@@ -49,8 +49,8 @@ services:
     command: jobmanager
     environment:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-    volumes:
-      - ./client/customerstreamapp/target/CustomerStreamApp-0.1-SNAPSHOT.jar:/analyticsjob.jar
+    # volumes:
+    #   - ./client/customerstreamapp/target/CustomerStreamApp-0.1-SNAPSHOT.jar:/analyticsjob.jar
     networks:
       - shared-network
 

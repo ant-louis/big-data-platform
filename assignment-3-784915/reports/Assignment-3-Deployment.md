@@ -33,17 +33,17 @@ Note that UI are available for Flink and RabbitMQ in your web browser at *'local
 
 
 ### 2. Deploy the streaming analytics app
-In this demo, the Java app has been compiled into a *.jar* file available in *code/client/customerstreamapp/target/CustomerStreamApp-0.1-SNAPSHOT.jar*. By default, when the Flink Job Manager Docker starts, it copies this file at its root. The customer then just have to launch the analytics job by executing this file (see next point).
-
-In the case where the customer would want to modify his customerstreamapp Java project, he must follow the next steps:
-1. Compile the Java project with Maven by running the following command in the *code/client/customerstreamapp/* repository:
-```bash
-mvn install
-```
-2. Copy the new compiled *.jar* file to the running Flink Job Manager Docker, by executing the following command:
+In this demo, the customer Java app has been compiled into a *.jar* file available in *code/client/customerstreamapp/target/CustomerStreamApp-0.1-SNAPSHOT.jar*. To deploy this app on the Flink Job Manager, run the following command in the *code/client/customerstreamapp/* repository:
 ```bash
 docker cp target/CustomerStreamApp-0.1-SNAPSHOT.jar flink-jobmanager:/analyticsjob.jar
 ```
+This will copy the *.jar* file to the Docker container in order to run it when the customer wants to.
+
+In the case where the customer would want to modify his customerstreamapp Java project, he must first recompile his project by running the following command in the *code/client/customerstreamapp/* repository:
+```bash
+mvn install
+```
+Then, he must copy the new *.jar* file to the Flink Job Manager Docker as previously explained.
 
 
 ### 3. Start the streaming analytics job

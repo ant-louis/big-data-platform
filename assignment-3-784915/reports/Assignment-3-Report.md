@@ -247,9 +247,18 @@ In order to run the Docker containers, I gave Docker 4 CPUs and 6 Go of RAM.
 The results of the analytics can be found in the file *code/client/result_analytics.log*. It shows the result messages of both the *MyProcessWindowFunction* and the *GlobalStatisticsFunction*. These two can be differentiated by the field "Message Type" in the received *.json* files. The message type is set to "WindowStreamingAnalytics" for the result of *MyProcessWindowFunction*, and to "GlobalStreamingAnalytics" for the result of *GlobalStatisticsFunction*. In addition, this *.log* file also contains messages of the type "DeserializationError", which happens when an input line has not been deserialized properly (see next point for further explanations).
 
 
+#### Performance observations
+Flink seems to manage very well the incoming records of the customers, performing near real-time analytics that is observable when user launches to terminal consoles, one that produces (send) the data, and the other that shows the resulting analytics coming from Flink. One can see that these analytics messages are arriving nearly as soon as the data is sent on the customer side.
+
+
 ### 4. Presentation of the tests and management of wrong data
 
 #### Tests
+As previously mentioned, the testing of the analytics was tested by considering a demo customer who sends data from the BTS dataset to mysimbdp platform. All the implementation, debugging and observations were realized with this demo user. However, the platform was later tested with mutliple customers sending at the same time their sensor's data (same dataset consider for ease of the demo) and expected the analytics from their *customerstreamapp* (same for everyone for ease of the demo) in return. Flink handled properly the analytics of the customers with nearly no delay. Here is the total time that it took to get the analytics back for all customers:
+* With 1 customer (expecting 1000 analytics messages): 1.057348151000042 s
+* With 2 customers (expecting 1000 analytics messages each): 1.274434758001007 s
+* With 5 customer (expecting 1000 analytics messages): 1.134677820956771 s
+* With 10 customers (expecting 1000 analytics messages each): 1.380097125 s
 
 
 #### Handling wrong data
@@ -267,10 +276,7 @@ As a result, we get a stream of valid *BTSEvent* that can further be processed. 
 
 
 ### 5. Parallelism settings: performance and issues
-A Flink program consists of multiple tasks (transformations, data sources, and sinks), where each task is split into a given number of parallel instances for execution, each instance processing a subset of the task’s input data. In this demo, the parallelism was initially set to 1. 
-
-
-RMQSource pas parallisable par defaut
+A Flink program consists of multiple tasks (transformations, data sources, and sinks), where each task is split into a given number of parallel instances for execution, each instance processing a subset of the task’s input data. In this demo, the parallelism was initially set to 1. I tried to increment the level of parallelism but got issues because of the chosen guarantee for message delivery. Indeed, as explained in the Point 1.2, I chose to have "Exactly-Once" delivery messages. This configuration is set up when creating the *StreamExecutionEnvironment* in the *CustomerStreamApp*, but can actually only works when the parallelism is set to 1 when the DataStream is instantiated. Indeed, when using the *RMQSource* class consume messages from RabbitMQ queues, the documentation states that the source must be non-parallel (parallelism set to 1) in order to achieve exactly-once. This limitation is mainly due to RabbitMQ’s approach to dispatching messages from a single queue to multiple consumers. This error was thus to be expected, and in order to solve it, it is necessary to provide a "at-least-once" guarantee in the configuration instead of a "exactly-once".
 
 
 

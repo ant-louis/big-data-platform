@@ -45,7 +45,7 @@ def run(queue_name, input_file):
                                 properties=pika.BasicProperties(
                                     delivery_mode = 2, # make message persistent
                             ))
-        #time.sleep(1)
+        time.sleep(1)
         counter += 1
 
     # End timing, get elapsed time and compute emission throughput
