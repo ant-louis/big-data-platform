@@ -17,12 +17,14 @@ def parse_arguments():
     return args
 
 
-def run(args):
+def start_job(iqueue, oqueue, parallelism):
     """
     """
-    # Run the analytics job
-    os.system("docker exec -ti flink-jobmanager flink run /analyticsjob.jar --amqpurl rabbit  --iqueue "+args.iqueue+" --oqueue "+args.oqueue+" --parallelism "+args.parallelism)
+    os.system("docker exec -ti flink-jobmanager flink run /analyticsjob.jar --amqpurl rabbit  --iqueue "+iqueue+" --oqueue "+oqueue+" --parallelism "+parallelism)
 
+
+    
 if __name__ == "__main__":
     args = parse_arguments()
-    run(args)
+    start_job(args.iqueue, args.oqueue, args.parallelism)
+

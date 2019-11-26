@@ -1,6 +1,6 @@
-#!/usr/bin/env python
 import pika, os, logging, sys, time
 import argparse
+import timeit
 
 
 
@@ -17,38 +17,50 @@ def parse_arguments():
     return args
 
 
-def run(args):
+def run(queue_name, input_file):
     """
     """
     # Connect to the channel
-    print("Connecting to the channel {}...".format(args.queue_name))
+    print("Connecting to the channel {}...".format(queue_name))
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=args.queue_name, durable=True)  # mark both the queue and messages as durable to make sure that messages aren't lost.
+    channel.queue_declare(queue=queue_name, durable=True)  # mark both the queue and messages as durable to make sure that messages aren't lost.
     print("Connected !")
 
 
     # Send data line by line
-    print("Sending data from {}...".format(args.input_file))
-    f = open(args.input_file, 'r')
+    print("Sending data from {}...".format(input_file))
+    f = open(input_file, 'r')
     f.readline()  # Consume header
+
+    # Start timing
+    start = timeit.default_timer()
+    counter = 0
     for line in f:
         print ("Send a line")
         print ("-----------------------")
         channel.basic_publish(exchange='',
-                                routing_key=args.queue_name,
+                                routing_key=queue_name,
                                 body=line,
                                 properties=pika.BasicProperties(
                                     delivery_mode = 2, # make message persistent
                             ))
-        time.sleep(1)
+        #time.sleep(1)
+        counter += 1
+
+    # End timing, get elapsed time and compute emission throughput
+    end = timeit.default_timer()
+    elapsed_time = end-start
+    throughput = counter/elapsed_time
 
     # Close connection
-    print("Closing connection to the channel {}...".format(args.queue_name))
+    print("Closing connection to the channel {}...".format(queue_name))
     connection.close()
 
+    # Return throuhput rate
+    return throughput
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    run(args)
+    run(args.queue_name, args.input_file)
