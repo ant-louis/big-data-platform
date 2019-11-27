@@ -28,7 +28,7 @@ def callback(ch, method, properties, body):
     print("Received:", message)
 
     # Append the result to the analytics file
-    f = open("result_analytics.log", "a+")
+    f = open("../../logs/result_analytics.log", "a+")
     f.write(message + '\n')
 
     # Ack the received message

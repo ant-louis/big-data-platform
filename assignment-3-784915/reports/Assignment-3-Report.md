@@ -196,7 +196,7 @@ Two kinds of analytics are performed in this project, on two different streams, 
 
 
 #### Serialization and output result
-The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, will return String objects as the result of their analytics. More specifically, they will create an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a *.json* file embedded in a String containing all the computed analytics. Therefore, the final data stream will be a stream of String containing the results of the analytics. The customer, on his side, listens to his output channel and sees on his console the incoming result messages. These messages are also saved in the file *code/client/result_analytics.log*, to let the customer analyze properly the outputted results of the analytics.
+The processing functions, *MyProcessWindowFunction* and *GlobalStatisticsFunction*, will return String objects as the result of their analytics. More specifically, they will create an object *BTSAlert* that will store all the computed analytics. These objects also dispose of functions that will return a *.json* file embedded in a String containing all the computed analytics. Therefore, the final data stream will be a stream of String containing the results of the analytics. The customer, on his side, listens to his output channel and sees on his console the incoming result messages. These messages are also saved in the file *logs/result_analytics.log*, to let the customer analyze properly the outputted results of the analytics.
 
 Examples of the output messages are given in the next point for each function.
 
@@ -244,21 +244,24 @@ In order to run the Docker containers, I gave Docker 4 CPUs and 6 Go of RAM.
 
 
 #### Results of the analytics
-The results of the analytics can be found in the file *code/client/result_analytics.log*. It shows the result messages of both the *MyProcessWindowFunction* and the *GlobalStatisticsFunction*. These two can be differentiated by the field "Message Type" in the received *.json* files. The message type is set to "WindowStreamingAnalytics" for the result of *MyProcessWindowFunction*, and to "GlobalStreamingAnalytics" for the result of *GlobalStatisticsFunction*. In addition, this *.log* file also contains messages of the type "DeserializationError", which happens when an input line has not been deserialized properly (see next point for further explanations).
+The results of the analytics can be found in the file *logs/result_analytics.log*. It shows the result messages of both the *MyProcessWindowFunction* and the *GlobalStatisticsFunction*. These two can be differentiated by the field "Message Type" in the received *.json* files. The message type is set to "WindowStreamingAnalytics" for the result of *MyProcessWindowFunction*, and to "GlobalStreamingAnalytics" for the result of *GlobalStatisticsFunction*. In addition, this *.log* file also contains messages of the type "DeserializationError", which happens when an input line has not been deserialized properly (see next point for further explanations).
 
 
 #### Performance observations
-Flink seems to manage very well the incoming records of the customers, performing near real-time analytics that is observable when user launches to terminal consoles, one that produces (send) the data, and the other that shows the resulting analytics coming from Flink. One can see that these analytics messages are arriving nearly as soon as the data is sent on the customer side.
+Flink seems to manage very well the incoming records of the customers, performing near real-time analytics that is observable when user launches to terminal consoles, one that produces (send) the data, and the other that shows the resulting analytics coming from Flink. One can see that these analytics messages are arriving nearly as soon as the data is sent from the customer.
 
 
 ### 4. Presentation of the tests and management of wrong data
 
 #### Tests
-As previously mentioned, the testing of the analytics was tested by considering a demo customer who sends data from the BTS dataset to mysimbdp platform. All the implementation, debugging and observations were realized with this demo user. However, the platform was later tested with mutliple customers sending at the same time their sensor's data (same dataset consider for ease of the demo) and expected the analytics from their *customerstreamapp* (same for everyone for ease of the demo) in return. Flink handled properly the analytics of the customers with nearly no delay. Here is the total time that it took to get the analytics back for all customers:
+As previously mentioned, the testing of the analytics was performed by considering a demo customer who sends data from the BTS dataset to mysimbdp platform and receives the corresponding analytics of his *customerstreamapp*. The result analytics of this demo can be found in the *result_analytics.log* file from the *logs/* repository. These analytics were observed for some chosen data points and proven to be correct.
+
+In addition, the platform was later tested with multiple customers sending at the same time their sensor's data (same dataset consider for ease of the demo) and expecting the analytics from their *customerstreamapp* (same for everyone for ease of the demo) in return. These tests were implemented thanks to two Python scripts: *perf_toggle_Ntimes* that has been executed first and basically launches N Flink jobs in the Docker container, one for each customer (eeach customer having his own input and output queues), and *perf_test.py* that measures the total time that Flink took to send back all the analytics to all customers. Results shown that Flink handled properly the analytics of the customers with nearly no delay. Here is the total time that it took to get the analytics back for all customers (for a demo dataset of 1000 lines):
 * With 1 customer (expecting 1000 analytics messages): 1.057348151000042 s
 * With 2 customers (expecting 1000 analytics messages each): 1.274434758001007 s
 * With 5 customer (expecting 1000 analytics messages): 1.134677820956771 s
-* With 10 customers (expecting 1000 analytics messages each): 1.380097125 s
+
+Hence, increasing the number of users seems not to modify the responsiveness of Flink that still performs the analytics of each customer in a near real-time delay.
 
 
 #### Handling wrong data
@@ -268,9 +271,9 @@ As a reminder, the *BTSParser* parses a String line to retrieve the values of th
 
 That way, whatever the format of the incoming line, a *BTSEvent* is created and the stream is never interrupted. Now, back to the *CustomerStreamApp* streaming pipeline, the result of the *flatMap* with the *BTSParser* outputs a data stream of *BTSEvent* that will then be split into two *BTSEvent* data streams: one of valid events (checked with the *isDeserialized* instance variable of the event), and the other of invalid events (where a deserialization error occurred due to a bad format, where the *isDeserialized* instance variable of the event is thus set to *false*). The splitting is performed by creating a *SplitStream* by applying the *split* function to the parsed data stream.
 
-As a result, we get a stream of valid *BTSEvent* that can further be processed. The "error" stream is just outputted in the output channel of the customer in a *.json* format to let him know which line was badly formatted. The outputted message is of the following form:
+As a result, we get a stream of valid *BTSEvent* that can further be processed. The "error" stream is just outputted in the output channel of the customer in a *.json* format to let him know which line was badly formatted. In addition, it also keeps a counter of the number of deserializations errors that happen since the beginning of the analytics job. The outputted message is of the following form:
 ````
-{"Message Type":"Error","Content":{"Message":Deserialization error for the line: 'THIS LINE IS WRONG'}}
+{"Message Type":"DeserializationError","Content":{"Error line":'THIS LINE IS WRONG',"Total number of errors":1}}
 ````
 
 
@@ -282,5 +285,39 @@ A Flink program consists of multiple tasks (transformations, data sources, and s
 
 
 ## Part 3 - Connection
+### 1. Design and implementation for storing the analytics into mysimbdp-coredms
+The previously presented schema already considered the integration of mysimbdp-coredms into the pipeline. As a reminder, here it is:
 
-### 1. 
+![scheme](figures/schema.png)
+
+The sixth step actually consists of storing the computed analytics in a dedicated keyspace in the Cassandra database. 
+
+On the technical side, the (Apache Cassandra Connector)[https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/cassandra.html] would be necessary to stream these analytics into the database. In order to integrate the streaming to Cassandra, I would modify a bit my original pipeline. First, I would change the output result of my processing functions (*MyProcessWindowFunction* and *GlobalStatisticsFunction*). As a reminder, these functions now output a String by first creating a new *BTSAlert* event and then calling a class method outputting a *.json* file embedded into a String. Instead of doing that, I would output the analytics as a Tuple, as the Cassandra sinks currently support either Tuple or POJO data types. From there, I could stream the Tuple Data Stream into the *CassandraSink* by performing the desired CQL query with *setQuery*. Then, to send back the analytics to the customer, I would simply need to perform an extra *flatMap* operation on this stream of Tuples to convert them into the *.json* files to get back the stream of String that I have now. This stream will then be added to the RabbitMQ sink as previously.
+
+
+### 2. Implementation of a batch analytics given historical data stored in mysimbdp-coredms
+One possible batch analytics that the customer could perform using the stored streaming analytics would be to analyze for each station which sensor has activated the most alarms during a given period of time. This analytics would be possible thanks to the collected results of the "counter of active events" in the *GlobalStatisticsFunction*. One could think at an interactive dashboard where user could select the station he wants, and this would output an histogram of the sensors that triggered the most alarms during the day. 
+
+For the implementation, I would use an extra server running in a Docker container (simple Debian image for example where Python packages are installed, as well as Cassandra driver). With a simple API, the customer could push and toggle his batch analytics script to the server. These analytics would be Python scripts performing the desired computations by querying the Cassandra database. Once performed, the results of the batch analytics would be sent back to the customer (as a *.json* file containing the results for each station_id in a first time, but later one can think to a user interface with histograms). 
+
+
+### 3. Triggering the execution of a batch analytics
+I think that the simplest and most efficient solution is to trigger the alert from the customer side. More specifically, the customer would first modify his *customerstreamapp* running on Flink to integrate a message alert when the critical event happens. This new processing function could be called *CriticalAlertFunction* and that would output a message of the type *Alert* with the explanation of the alert. For example:
+````
+{"Message Type":"Alert","Content":{"Type":3,"Message":'Very high rate of alarms detected.'}}
+````
+Then, the *consume* script of the customer would parse each arriving message by checking if an "Alert" message appears. When it does, it would for example check the corresponding type of this alert and from there, toggle the *batch_analytics* script on the BatchAnalytics Server by passing the type of alert in the POST request to let it know which type of analytics it has to perform.
+
+An updated schema of the whole platform integrating this new feature is shown below:
+
+![scheme_part3](figures/schema_part3.png)
+
+The steps 1 to 6 are exactly the same as explained in Point 1.5. Then, let's explain the additional steps:
+* 
+
+
+### 4. Scaling the streaming analytics service
+
+
+
+### 5. Exactly once delivery

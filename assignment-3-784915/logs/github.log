@@ -1,0 +1,82 @@
+ebe574d was “Antoine, 20 hours ago, message: CODE FINISHED
+c3fcb4b was “Antoine, 2 days ago, message: Implement performances
+9dd86f2 was “Antoine, 2 days ago, message: Made modifs to code everything works
+536144f was “Antoine, 2 days ago, message: Modify deserialization error
+0294b40 was “Antoine, 2 days ago, message: Checkpoint writing of report
+75aef7d was “Antoine, 2 days ago, message: Finish 2.1 report
+0cfaaba was “Antoine, 2 days ago, message: Checkpoint for writing of report
+225e7bb was “Antoine, 2 days ago, message: Rename app + continue report
+df25e4e was “Antoine, 3 days ago, message: Finish all part1 report
+9f46eb7 was “Antoine, 3 days ago, message: Finish all part1 report
+06744bf was “Antoine, 3 days ago, message: Deployment report ok
+efacb43 was “Antoine, 3 days ago, message: Everythin works: implementation DONE
+645e12d was “Antoine, 3 days ago, message: Everything ok, gonna try to send everythin on same queue now
+840d5bb was “Antoine, 3 days ago, message: Handling of deserialization works
+487a439 was “Antoine, 3 days ago, message: New analytics works
+7e528ad was “Antoine, 3 days ago, message: My analtics works
+3de9d8d was “Antoine, 3 days ago, message: First draft of stats function works
+68f0552 was “Antoine, 4 days ago, message: Demo analytics works fine
+cf90ac1 was “Antoine, 4 days ago, message: WORKS with sorted dataset
+942691a was “Antoine, 4 days ago, message: Works only with bts normal
+a7ca55f was “Antoine, 4 days ago, message: Works
+57f4da9 was “Antoine, 4 days ago, message: Add init db and split csv files
+c75ce3b was “Antoine, 4 days ago, message: Everythin is functional
+481d2aa was “Antoine, 5 days ago, message: Everything works now, need new analytics
+ba09b7b was “Antoine, 5 days ago, message: All docker work and folders renamed
+beaa81b was “Antoine, 5 days ago, message: Merge branch 'master' of https://github.com/antoinelouis02/Big-Data-Platform
+a3f0bc7 was “Antoine, 5 days ago, message: Remove useless files
+55eb10f was Antoine Louis, 5 days ago, message: Delete simplebts.iml
+3d3c735 was “Antoine, 5 days ago, message: All connections work
+bebed0b was “Antoine, 5 days ago, message: Docker ALL running + consumer and producer for client working
+269a884 was “Antoine, 7 days ago, message: Containers all run but stuck with kafka connection in spark app
+e53f7c6 was “Antoine, 8 days ago, message: Docker containers ALL working
+ae6c653 was “Antoine, 9 days ago, message: Kafka and Zeppelin dockers working
+46993f6 was “Antoine, 9 days ago, message: Producer and consumer ok
+31daf5a was “Antoine, 9 days ago, message: Delete db files
+8ecdea4 was “Antoine, 9 days ago, message: Docker container for Kafka broker working
+2694bd9 was “Antoine, 9 days ago, message: Go with Kafka and Spark
+a47f113 was “Antoine, 2 weeks ago, message: Can send messages to docker RabbitMQ
+919bfdf was “Antoine, 2 weeks ago, message: Re-organization of files
+f6ddfd1 was “Antoine, 2 weeks ago, message: Producer and consumer in progress
+0095ea1 was “Antoine, 2 weeks ago, message: Producer and consumer ok in local
+18c4ef6 was “Antoine, 2 weeks ago, message: First draft of consumer and producer
+8fd8145 was “Antoine, 2 weeks ago, message: Client producer beta
+43e182c was “Antoine, 2 weeks ago, message: Q4 done
+41e37fc was “Antoine, 2 weeks ago, message: Q4 ok
+5d09eff was “Antoine, 2 weeks ago, message: Q1 -> Q3 done.
+fd9084c was “Antoine, 2 weeks ago, message: Partial answers to Q1 -> Q3
+388044d was “Antoine, 2 weeks ago, message: Partial answers to Q1 -> Q3
+28f3372 was “Antoine, 2 weeks ago, message: New dataset ok and docker database ok
+d9d5dc5 was “Antoine, 2 weeks ago, message: Update reports
+8fedaa6 was “Antoine, 2 weeks ago, message: Remove all files from previous assignment and add new dataset
+94aa959 was “Antoine, 3 weeks ago, message: Merge branch 'master' of https://github.com/antoinelouis02/Big-Data-Platform
+a707acb was “Antoine, 3 weeks ago, message: Reorganize files
+0a91feb was Antoine Louis, 3 weeks ago, message: Create README.md
+b72409e was “Antoine, 4 weeks ago, message: Everythin operational
+a2f309f was “Antoine, 4 weeks ago, message: .DS_Store banished!
+0bc69ad was “Antoine, 4 weeks ago, message: Performance finished
+7fb28b5 was “Antoine, 4 weeks ago, message: performances tests done
+55d91b3 was “Antoine, 4 weeks ago, message: Data ingest WORKS
+bbd4613 was “Antoine, 4 weeks ago, message: Ingest almost ok
+5705355 was “Antoine, 4 weeks ago, message: fetch data finished
+1ec012d was “Antoine, 4 weeks ago, message: docker-compose ok
+f2955c8 was “Antoine, 4 weeks ago, message: Update all for this assignment
+a37e6d0 was “Antoine, 7 weeks ago, message: All reports done.
+7352fdb was “Antoine, 7 weeks ago, message: add student nb in submitter.csv
+0806378 was “Antoine, 7 weeks ago, message: Implementation of performances tests done
+836aeb4 was “Antoine, 7 weeks ago, message: data_ingest all ok
+1f92f5a was “Antoine, 7 weeks ago, message: Begin readme code
+c03e3d9 was “Antoine, 7 weeks ago, message: Remove useless files
+e1bf3d8 was “Antoine, 7 weeks ago, message: Add a clean_data file to clean the original Google dataset. Update data ingest file to match with cleaned dataset.
+b22d123 was “Antoine, 7 weeks ago, message: Update init file by modifying types of variables
+1091160 was “Antoine, 7 weeks ago, message: Create keyspace and create table OK
+1463909 was “Antoine, 7 weeks ago, message: Connection to database ok
+56dbadb was “Antoine, 7 weeks ago, message: add compose filde docker + structure data file
+5dde18e was “Antoine, 7 weeks ago, message: add data Google Playstore
+a704ec5 was “Antoine, 7 weeks ago, message: add statement
+15750ed was Antoine Louis, 7 weeks ago, message: Update README.md
+3dce706 was “Antoine, 7 weeks ago, message: add template
+ba6b6be was “Antoine, 7 weeks ago, message: Merge branch 'master' of https://github.com/antoinelouis02/Big-Data-Platform
+87766ee was “Antoine, 7 weeks ago, message: remove DS_Store
+3ee9327 was Antoine Louis, 7 weeks ago, message: Create .gitignore
+951c30d was “Antoine, 7 weeks ago, message: initial commit
