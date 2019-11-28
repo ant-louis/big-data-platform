@@ -313,11 +313,18 @@ An updated schema of the whole platform integrating this new feature is shown be
 ![scheme_part3](figures/schema_part3.png)
 
 The steps 1 to 6 are exactly the same as explained in Point 1.5. Then, let's explain the additional steps:
-* 
+* Step 7: In the *"consume"* script, a parser analyzes all the incoming messages waiting for those of the type "Alert". When it receives one, it will launch the toggle_batch script.
+* Step 8: The toggle_batch script is responsible for launching the corresponding batch analytics on the batchanalytics server.
+* Step 9: The server will query the Cassandra database to get the information needed to perform the desired analytics.
+* Step 10: Once the batch analytics computed, the server will send back the result to the consumer.
 
 
 ### 4. Scaling the streaming analytics service
+One way to ensure a good responsiveness and a near real-time delay from the analytics performed by Flink is obviously by increasing the number of workers performing the tasks. This can be done easily by running multiple *flink-taskmanager* Docker containers. Note that instead of launching the workers manually, services like Docker Swarn or Kubernetes might automate this process in function of the current load to manage.
+
+Similarly, multiple nodes of RabbitMQ could be developed (here only one is running) in order to build an entire cluster. This would  allow the customers to have their queues on multiples nodes which will definitely be better for scalability (can manage more data from many customers). Once again, a new node can simply be launched by running an additional *rabbit* Docker container (see docker-compose file).
 
 
 
 ### 5. Exactly once delivery
+In theory, all the parameters in both Flink and RabbitMQ have been set to perform exactly-once delivery guarantees. Indeed, as previously mentioned, the environment in the Flink *customerstreamapp* has been configured with a *ChekpointingMode* set to "EXACTLY_ONCE". In addition, the [documentation](https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/guarantees.html) about the fault tolerance guarantees of data sources and sinks in Flink tells us that RabbitMQ sink (v1.0) performs exactly-once, as well as the Cassandra sink (for idempotent updates). On the customer side, the acknowledgement mechanism was set manually (no *auto-ack*) in order to consume the messages exactly-once. All that being said, we have to keep in mind that it is impossible to 100% guarantee that a single message will only be handled exactly once. Any error in the pipeline or in the consumer code could cause the message to be returned to the queue and processed again. Because of this, the messages/consumers need to use idempotence to ensure processing the same message twice will not cause problems, which is not an easy process. So in conclusion I don't think that my platform can guarantee 100% exactly-once delivery from end-to-end.

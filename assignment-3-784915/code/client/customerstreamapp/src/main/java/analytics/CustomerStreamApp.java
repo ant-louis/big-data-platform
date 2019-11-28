@@ -42,7 +42,7 @@ import org.apache.commons.csv.CSVRecord;
 
 public class CustomerStreamApp {
 
-	// Variables
+	// Variables 
 	private static String input_rabbitMQ;
 	private static String inputQueue;
 	private static String outputQueue;
