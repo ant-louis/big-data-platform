@@ -1,5 +1,5 @@
 # Big-Data-Platform
-Imagine that you finish the course and become an "expert" of "Big Data Platforms" from @CSAalto. You work for a company and one day you get a request  to build a big data platform for the company with your team (in this course your team is you, playing different roles). You might get a description like
+Imagine that you finish the course and become an "expert" of "Big Data Platforms" from @CSAalto. You work for a company and one day you get a request  to build a big data platform for the company with your team (in this course your team is you, playing different roles). You might get a description like 
 
 “Your team has to build a big data platform for X types of data. Data will be generated/collected from N sources. We expect to have  10+ GBs/day  of data to be ingested into our platform. We will have to serve K thousands of requests for  different types of analytics – to be determined. Our response time should be  in t milliseconds. Our services should not be …”
 
